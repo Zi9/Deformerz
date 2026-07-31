@@ -1,7 +1,0 @@
-{
-    "cmake.generator": "Ninja",
-    "cmake.configureSettings": {
-        "BUILD_EXAMPLES": "off",
-        "OpenGL_GL_PREFERENCE": "GLVND"
-    }
-}

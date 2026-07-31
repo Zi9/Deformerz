@@ -1,0 +1,9 @@
+[submodule "vendor/raylib"]
+	path = vendor/raylib
+	url = git@github.com:/raysan5/raylib.git
+[submodule "vendor/rlImGui"]
+	path = vendor/rlImGui
+	url = git@github.com:raylib-extras/rlImGui.git
+[submodule "vendor/cimgui"]
+	path = vendor/cimgui
+	url = git@github.com:cimgui/cimgui.git

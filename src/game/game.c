@@ -21,7 +21,7 @@ void game_load(Config cfg)
 {
     game.activeCam = camera_create();
     game.currentMap = map_load(cfg.baseDataPath);
-    game.currentCar = car_load("./data/terep/car1.dat");
+    game.currentCar = car_load("./data/terep/car2.dat");
     game.currentCar->currentSelSeg = 0;
     game.render.wireframe = false;
 }
