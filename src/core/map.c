@@ -86,7 +86,6 @@ void build_map_model(DFMap* map)
         }
     }
 
-    msh.vboId = malloc(sizeof(uint32_t) * 7);
     msh.vertices = vertices;
     msh.texcoords = uvs;
     UploadMesh(&msh, false);
