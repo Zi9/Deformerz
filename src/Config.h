@@ -4,13 +4,14 @@
 #include <stdint.h>
 
 #define GAME_WINDOW_TITLE "Deformers - A recreation of Terep2"
-// #define EDITOR_WINDOW_TITLE "Deformers - A recreation of Terep2 - Editor Mode"
+#define WMARK "Deformers - Development Build"
 
 typedef struct Config {
     struct {
         uint16_t width;
         uint16_t height;
         uint8_t upscaleMultiplier;
+        uint8_t targetFPS;
     } render;
     char* baseDataPath;
     char* scenario;
@@ -18,5 +19,5 @@ typedef struct Config {
     bool restart;
 } Config;
 
-Config config_terep();
-Config config_default();
+Config Config_Terep();
+Config Config_Default();

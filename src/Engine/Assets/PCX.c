@@ -1,4 +1,4 @@
-#include "pcx.h"
+#include "PCX.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -38,7 +38,7 @@ struct PCXData {
     struct RGBColor palette[256];
 };
 
-struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
+static struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
 {
     struct PCXData* pcx = malloc(sizeof *pcx);
     FILE* fp = fopen(path, "r");
@@ -107,14 +107,14 @@ struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t ta
     return pcx;
 }
 
-uint8_t* pcx_load_as_array(const char* path)
+uint8_t* PCX_LoadArray(const char* path)
 {
     struct PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
     uint8_t* array = pcx->indices;
     free(pcx);
     return array;
 }
-Image pcx_load_as_image(const char* path)
+Image PCX_LoadImage(const char* path)
 {
     struct PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
 

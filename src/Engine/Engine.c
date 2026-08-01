@@ -1,15 +1,48 @@
-#include "game/game.h"
-
+#include "Engine.h"
+#include "Assets/AssetManager.h"
+#include "Engine/Rendering/DFCamera.h"
+#include "Rendering/Renderer.h"
 #include <raylib.h>
-#include <rlgl.h>
-#include <stdlib.h>
 
-#include "core/camera.h"
-#include "core/car.h"
-#include "core/map.h"
+EngineData Engine = {0};
 
+void Engine_Initialize()
+{
+    SetTraceLogLevel(LOG_ERROR);
+    // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    Renderer_Initialize();
+    Engine.car = Assets_LoadDFCar("data/terep/car1.dat");
+    Engine.map = Assets_LoadDFMap(Engine.cfg.baseDataPath);
+}
+
+void Engine_Loop()
+{
+    Engine.dt = GetFrameTime();
+    Engine.time += Engine.dt;
+    DFCamera_Update();
+    Renderer_Render();
+}
+
+void Engine_Destroy()
+{
+    Renderer_Destroy();
+    Assets_UnloadDFCar(Engine.car);
+    Assets_UnloadDFMap(Engine.map);
+}
+
+Config Engine_Main(Config cfg)
+{
+    Engine.cfg = cfg;
+    Engine_Initialize();
+    while (!WindowShouldClose()) {
+        Engine_Loop();
+    }
+    Engine_Destroy();
+    return Engine.cfg;
+}
+
+/*
 struct GameState {
-    DFCamera activeCam;
     DFMap* currentMap;
     DFCar* currentCar;
     struct {
@@ -52,7 +85,7 @@ Config game_main(Config initialConfig)
     InitWindow(cfg.render.width * cfg.render.upscaleMultiplier, cfg.render.height * cfg.render.upscaleMultiplier,
                GAME_WINDOW_TITLE);
     SetTargetFPS(60);
-    SetExitKey(KEY_CAPS_LOCK);
+    //SetExitKey(KEY_CAPS_LOCK);
 
     RenderTexture2D target;
     if (cfg.render.upscaleMultiplier == 1) {
@@ -109,3 +142,4 @@ Config game_main(Config initialConfig)
     CloseWindow();
     return cfg;
 }
+*/

@@ -13,7 +13,3 @@ typedef struct DFMap {
     Shader normalShd;
     Shader affineShd;
 } DFMap;
-
-DFMap* map_load(const char* basePath);
-void map_unload(DFMap* map);
-void map_render(DFMap* map);

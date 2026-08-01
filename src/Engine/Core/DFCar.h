@@ -43,7 +43,3 @@ typedef struct DFCar {
 
     uint8_t drivetrainMode;
 } DFCar;
-
-DFCar* car_load(const char* path);
-void car_unload(DFCar* car);
-void car_render(DFCar* car);

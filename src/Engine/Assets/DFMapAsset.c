@@ -1,4 +1,4 @@
-#include "map.h"
+#include "Engine/Core/DFMap.h"
 
 #include <math.h>
 #include <rlgl.h>
@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "pcx.h"
-#include "shaders.h"
+#include "Engine/Rendering/Shaders.h"
+#include "PCX.h"
 
 #define TMAP_SCALE 1.0f
 #define TMAP_HEIGHT_SCALE 0.075f
@@ -92,7 +92,7 @@ void build_map_model(DFMap* map)
     map->model = LoadModelFromMesh(msh);
 }
 
-DFMap* map_load(const char* basePath)
+DFMap* Assets_LoadDFMap(const char* basePath)
 {
     DFMap* map = malloc(sizeof *map);
     map->size = TEREP_MAPSZ;
@@ -109,18 +109,18 @@ DFMap* map_load(const char* basePath)
     strncpy(tmapPath, basePath, 240);
     strcat(tmapPath, TEREP_MAPTEX_FILE);
 
-    map->colormap = pcx_load_as_array(cmapPath);
-    map->heightmap = pcx_load_as_array(hmapPath);
-    map->image = pcx_load_as_image(tmapPath);
+    map->colormap = PCX_LoadArray(cmapPath);
+    map->heightmap = PCX_LoadArray(hmapPath);
+    map->image = PCX_LoadImage(tmapPath);
     map->texture = LoadTextureFromImage(map->image);
 
     build_map_model(map);
-    map->affineShd = LoadShaderFromMemory(affine_vs, affine_fs);
+    map->affineShd = LoadShaderFromMemory(Affine_vs, Affine_fs);
     map->normalShd = map->model.materials[0].shader;
     map->model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = map->texture;
     return map;
 }
-void map_unload(DFMap* map)
+void Assets_UnloadDFMap(DFMap* map)
 {
     free(map->colormap);
     free(map->heightmap);
@@ -129,9 +129,4 @@ void map_unload(DFMap* map)
     UnloadImage(map->image);
     UnloadTexture(map->texture);
     free(map);
-}
-void map_render(DFMap* map)
-{
-    if (map != NULL)
-        DrawModel(map->model, (Vector3){0.0f, -10.0f, 0.0f}, 1.0f, WHITE);
 }

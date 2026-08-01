@@ -4,7 +4,7 @@ import glob
 SHADERS_FOLDER = sys.argv[1]
 SHADERS_OUTPUT = sys.argv[2]
 
-outfile = open(f"{SHADERS_OUTPUT}/shaders.h", "w")
+outfile = open(f"{SHADERS_OUTPUT}/Shaders.h", "w")
 
 shaders = []
 
@@ -33,5 +33,5 @@ for shader in shaders:
                 outfile.write(f'"{cLine}\\n";\n')
             else:
                 outfile.write(f'"{cLine}\\n"\n')
-    
+
 outfile.close()

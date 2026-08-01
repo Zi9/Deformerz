@@ -1,4 +1,4 @@
-#include "car.h"
+#include "Engine/Core/DFCar.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +16,8 @@ struct __attribute__((packed)) datapoint1 {
     int16_t diameter;
     uint16_t pointType;
 };
-void load_car_chunk1(DFCar* car, FILE* fp)
+
+static void load_car_chunk1(DFCar* car, FILE* fp)
 {
     fread(&(car->pointCount), sizeof car->pointCount, 1, fp);
     struct datapoint1 curPoint;
@@ -65,7 +66,8 @@ struct __attribute__((packed)) datapoint2 {
     uint16_t type;
     uint16_t other3, other4;
 };
-void load_car_chunk2(DFCar* car, FILE* fp)
+
+static void load_car_chunk2(DFCar* car, FILE* fp)
 {
     uint16_t count;
     fread(&count, sizeof count, 1, fp);
@@ -102,7 +104,7 @@ void load_car_chunk2(DFCar* car, FILE* fp)
     printf("INFO: CARLOAD: Loaded %d physics segments\n", car->physSegmentCount);
 }
 
-void load_car_chunk3(DFCar* car, FILE* fp)
+static void load_car_chunk3(DFCar* car, FILE* fp)
 {
     uint8_t dtype;
     while (fread(&dtype, sizeof dtype, 1, fp) != 0) {
@@ -194,7 +196,7 @@ struct __attribute__((packed)) carDatHeader {
     uint16_t unknown;
     uint16_t drivetrainMode;
 };
-DFCar* car_load(const char* path)
+DFCar* Assets_LoadDFCar(const char* path)
 {
     DFCar* car = malloc(sizeof *car);
     FILE* f = fopen(path, "r");
@@ -202,19 +204,18 @@ DFCar* car_load(const char* path)
     struct carDatHeader hdr;
     fread(&hdr, sizeof hdr, 1, f);
     car->drivetrainMode = hdr.drivetrainMode;
-    switch (car->drivetrainMode)
-    {
-        case DFCAR_DRIVETRAIN_RWD:
-            printf("INFO: CARLOAD: Car is RWD\n");
-            break;
-        case DFCAR_DRIVETRAIN_FWD:
-            printf("INFO: CARLOAD: Car is FWD\n");
-            break;
-        case DFCAR_DRIVETRAIN_AWD:
-            printf("INFO: CARLOAD: Car is AWD\n");
-            break;
-        default:
-            printf("INFO: CARLOAD: Unknown drivetrain mode!\n");
+    switch (car->drivetrainMode) {
+    case DFCAR_DRIVETRAIN_RWD:
+        printf("INFO: CARLOAD: Car is RWD\n");
+        break;
+    case DFCAR_DRIVETRAIN_FWD:
+        printf("INFO: CARLOAD: Car is FWD\n");
+        break;
+    case DFCAR_DRIVETRAIN_AWD:
+        printf("INFO: CARLOAD: Car is AWD\n");
+        break;
+    default:
+        printf("INFO: CARLOAD: Unknown drivetrain mode!\n");
     }
     fseek(f, hdr.chunk1Start, SEEK_SET);
     load_car_chunk1(car, f);
@@ -224,55 +225,4 @@ DFCar* car_load(const char* path)
     fclose(f);
     return car;
 }
-void car_unload(DFCar* car) { free(car); }
-void car_render(DFCar* car)
-{
-    Color col;
-    for (size_t i = 0; i < car->pointCount; i++) {
-        switch (car->points[i].type) {
-        case DFCAR_POINT_GEOMETRY:
-            col = BLACK;
-            break;
-        case DFCAR_POINT_CAMERA:
-            col = MAGENTA;
-            break;
-        case DFCAR_POINT_WHEEL_FL:
-        case DFCAR_POINT_WHEEL_FR:
-            col = BLUE;
-            break;
-        case DFCAR_POINT_WHEEL_RL:
-        case DFCAR_POINT_WHEEL_RR:
-            col = RED;
-            break;
-        }
-        DrawCube(car->points[i].pos, 0.05f, 0.05f, 0.05f, col);
-#if CAR_PHYS_DEBUG_DRAW == 1
-        if (car->points[i].diameter > 0) {
-            DrawCircle3D(car->points[i].pos, car->points[i].diameter, (Vector3){0.0f, 1.0f, 0.0f}, 90, PINK);
-        }
-#endif
-    }
-#if CAR_PHYS_DEBUG_DRAW == 1
-    for (size_t i = 0; i < car->physSegmentCount; i++) {
-        if (car->currentSelSeg == i) {
-            col = PURPLE;
-        } else {
-            switch (car->physSegments[i].type) {
-            case DFCAR_SEGMENT_NORMAL:
-                col = WHITE;
-                break;
-            case DFCAR_SEGMENT_SUSP_FRONT:
-                col = BLUE;
-                break;
-            case DFCAR_SEGMENT_SUSP_REAR:
-                col = RED;
-                break;
-            case DFCAR_SEGMENT_SUSP_EXTRA:
-                col = GREEN;
-                break;
-            }
-        }
-        DrawLine3D(car->points[car->physSegments[i].pointA].pos, car->points[car->physSegments[i].pointB].pos, col);
-    }
-#endif
-}
+void Assets_UnloadDFCar(DFCar* car) { free(car); }
