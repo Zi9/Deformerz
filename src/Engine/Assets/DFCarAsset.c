@@ -1,19 +1,20 @@
 #include "Engine/Core/DFCar.h"
+#include "raymath.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #define CAR_PHYS_DEBUG_DRAW 1
+#define SCALE 10000000.0f
+
+Vector3 offset = {-3, -6, 0};
 
 struct __attribute__((packed)) datapoint1 {
-    uint16_t pad1;
-    int16_t x;
-    uint16_t pad2;
-    int16_t y;
-    uint16_t pad3;
-    int16_t z;
-    uint8_t pad4[12];
-    int16_t diameter;
+    int32_t x;
+    int32_t y;
+    int32_t z;
+    uint8_t pad4[10];
+    int32_t diameter;
     uint16_t pointType;
 };
 
@@ -23,11 +24,12 @@ static void load_car_chunk1(DFCar* car, FILE* fp)
     struct datapoint1 curPoint;
     for (size_t i = 0; i < car->pointCount; i++) {
         fread(&curPoint, sizeof curPoint, 1, fp);
-        car->points[i].pos.x = curPoint.x / 100.0f;
-        car->points[i].pos.y = curPoint.z / 100.0f;
-        car->points[i].pos.z = curPoint.y / 100.0f;
+        car->points[i].pos.x = curPoint.x / SCALE;
+        car->points[i].pos.y = curPoint.z / SCALE;
+        car->points[i].pos.z = curPoint.y / SCALE;
+        car->points[i].pos = Vector3Add(car->points[i].pos, offset);
         if (curPoint.diameter > 0) {
-            car->points[i].diameter = curPoint.diameter / 100.0f;
+            car->points[i].diameter = curPoint.diameter / SCALE;
         } else {
             car->points[i].diameter = 0.0f;
         }
@@ -62,9 +64,9 @@ static void load_car_chunk1(DFCar* car, FILE* fp)
 
 struct __attribute__((packed)) datapoint2 {
     uint16_t a, b;
-    uint16_t other1, other2;
+    uint16_t other1, other2; // NOTE: This might be something phys related?
     uint16_t type;
-    uint16_t other3, other4;
+    uint16_t other3, other4; // NOTE: This one too
 };
 
 static void load_car_chunk2(DFCar* car, FILE* fp)
@@ -186,7 +188,7 @@ static void load_car_chunk3(DFCar* car, FILE* fp)
             printf("\n");
         }
     }
-    printf("\e[0mINFO: CARLOAD: Reached end of car data file\n");
+    printf("\e[0mINFO: CARLOAD: Reached end of car data file (%li)\n", ftell(fp));
 }
 
 struct __attribute__((packed)) carDatHeader {

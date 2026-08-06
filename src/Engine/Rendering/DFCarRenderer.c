@@ -1,5 +1,11 @@
 #include "Engine/Core/DFCar.h"
+#include "raylib.h"
 #include <stdlib.h>
+
+void DrawPhysSeg(DFCar* car, int idx)
+{
+    DrawLine3D(car->points[car->physSegments[idx].pointA].pos, car->points[car->physSegments[idx].pointB].pos, RED);
+}
 
 void Renderer_RenderDFCar(DFCar* car)
 {
@@ -23,7 +29,11 @@ void Renderer_RenderDFCar(DFCar* car)
         }
         DrawCube(car->points[i].pos, 0.05f, 0.05f, 0.05f, col);
         if (car->points[i].diameter > 0) {
-            DrawCircle3D(car->points[i].pos, car->points[i].diameter, (Vector3){0.0f, 1.0f, 0.0f}, 90, PINK);
+            if (car->points[i].type == DFCAR_POINT_CAMERA) {
+                DrawSphere(car->points[i].pos, car->points[i].diameter, PINK);
+            } else {
+                DrawCircle3D(car->points[i].pos, car->points[i].diameter, (Vector3){0.0f, 1.0f, 0.0f}, 90, PINK);
+            }
         }
     }
     for (size_t i = 0; i < car->physSegmentCount; i++) {
@@ -45,6 +55,9 @@ void Renderer_RenderDFCar(DFCar* car)
                 break;
             }
         }
-        DrawLine3D(car->points[car->physSegments[i].pointA].pos, car->points[car->physSegments[i].pointB].pos, col);
+        //DrawLine3D(car->points[car->physSegments[i].pointA].pos, car->points[car->physSegments[i].pointB].pos, col);
+        DrawLine3D(car->points[18].pos, car->points[20].pos, RED);
+        //DrawPhysSeg(car, 0);
+        //DrawPhysSeg(car, 62);
     }
 }
