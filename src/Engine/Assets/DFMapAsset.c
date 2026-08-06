@@ -1,4 +1,5 @@
 #include "Engine/Core/DFMap.h"
+#include "Engine/Engine.h"
 
 #include <math.h>
 #include <rlgl.h>
@@ -19,7 +20,7 @@
 #define TEREP_COLORMAP_FILE "col.pcx"
 #define TEREP_MAPTEX_FILE "maptex.pcx"
 
-void build_map_model(DFMap* map)
+static void build_map_model(DFMap* map)
 {
     Mesh msh = {0};
     msh.triangleCount = (map->size - 1) * (map->size - 1) * 2;
@@ -92,6 +93,13 @@ void build_map_model(DFMap* map)
     map->model = LoadModelFromMesh(msh);
 }
 
+static void set_sky_color_hook(PCXData* pcx)
+{
+    Engine.skyColor.r = pcx->palette[255].red;
+    Engine.skyColor.g = pcx->palette[255].green;
+    Engine.skyColor.b = pcx->palette[255].blue;
+}
+
 DFMap* Assets_LoadDFMap(const char* basePath)
 {
     DFMap* map = malloc(sizeof *map);
@@ -109,7 +117,9 @@ DFMap* Assets_LoadDFMap(const char* basePath)
     strncpy(tmapPath, basePath, 240);
     strcat(tmapPath, TEREP_MAPTEX_FILE);
 
+    PCX_postprocess_callback = &set_sky_color_hook;
     map->colormap = PCX_LoadArray(cmapPath);
+    PCX_postprocess_callback = NULL;
     map->heightmap = PCX_LoadArray(hmapPath);
     map->image = PCX_LoadImage(tmapPath);
     map->texture = LoadTextureFromImage(map->image);

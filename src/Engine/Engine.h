@@ -11,6 +11,7 @@ typedef struct EngineData {
 
     DFCar* car;
     DFMap* map;
+    Color skyColor;
 } EngineData;
 
 extern EngineData Engine;

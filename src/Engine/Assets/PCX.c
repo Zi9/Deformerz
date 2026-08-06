@@ -9,9 +9,6 @@
 
 #define PCX_HEADER_SIZE 128
 #define PCX_PALETTE_SIZE 768
-struct __attribute__((__packed__)) RGBColor {
-    uint8_t red, green, blue;
-};
 struct __attribute__((__packed__)) PCXHeader {
     uint8_t identifier;
     uint8_t version;
@@ -33,10 +30,9 @@ struct __attribute__((__packed__)) PCXHeader {
     uint16_t bytesPerLine;
     uint16_t paletteInfo;
 };
-struct PCXData {
-    uint8_t* indices;
-    struct RGBColor palette[256];
-};
+
+
+void (*PCX_postprocess_callback)(PCXData*) = NULL;
 
 static struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
 {
@@ -103,6 +99,10 @@ static struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint
     assert(fread(&pcx->palette, PCX_PALETTE_SIZE, 1, fp) == 1);
 
     fclose(fp);
+
+    if (PCX_postprocess_callback != NULL) {
+        PCX_postprocess_callback(pcx);
+    }
 
     return pcx;
 }

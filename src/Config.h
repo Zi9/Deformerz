@@ -15,7 +15,6 @@ typedef struct Config {
     } render;
     char* baseDataPath;
     char* scenario;
-    Color skyColor;
     bool restart;
 } Config;
 

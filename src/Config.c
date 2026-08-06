@@ -6,7 +6,6 @@ Config Config_Terep()
         .render = {.width = 320, .height = 200, .upscaleMultiplier = 2},
         .baseDataPath = "./data/terep/",
         .scenario = "terep",
-        .skyColor = (Color){93, 199, 255, 255},
         .restart = false,
     };
     return cfg;

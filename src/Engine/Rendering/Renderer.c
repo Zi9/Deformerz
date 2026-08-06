@@ -25,15 +25,13 @@ void Renderer_Destroy()
 void Renderer_Render()
 {
     BeginDrawing();
-    ClearBackground(Engine.cfg.skyColor);
+    ClearBackground(Engine.skyColor);
     DFCamera_BeginRender();
     Renderer_RenderDFMap(Engine.map);
     Renderer_RenderDFCar(Engine.car);
     DFCamera_EndRender();
     rlImGuiBegin();
-    if (igBeginMainMenuBar()) {
-        igEndMainMenuBar();
-    }
+
     rlImGuiEnd();
     int height = GetScreenHeight();
     DrawText(WMARK, 0, height - 18, 20, BLACK);
