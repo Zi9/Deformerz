@@ -25,7 +25,7 @@ enum DrivetrainMode {
 typedef struct DFCarPoint {
     Vector3 pos;
     uint8_t type;
-    float diameter;
+    float size;
 } DFCarPoint;
 typedef struct DFCarPhysSegment {
     uint16_t pointA, pointB;
@@ -39,7 +39,6 @@ typedef struct DFCar {
 
     uint16_t physSegmentCount;
     DFCarPhysSegment physSegments[256];
-    uint16_t currentSelSeg;
 
     uint8_t drivetrainMode;
 } DFCar;

@@ -1,5 +1,4 @@
 #include "Engine/Core/DFCar.h"
-#include "raymath.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,14 +6,12 @@
 #define CAR_PHYS_DEBUG_DRAW 1
 #define SCALE 10000000.0f
 
-Vector3 offset = {-3, -6, 0};
-
 struct __attribute__((packed)) datapoint1 {
     int32_t x;
     int32_t y;
     int32_t z;
     uint8_t pad4[10];
-    int32_t diameter;
+    int32_t size;
     uint16_t pointType;
 };
 
@@ -27,11 +24,10 @@ static void load_car_chunk1(DFCar* car, FILE* fp)
         car->points[i].pos.x = curPoint.x / SCALE;
         car->points[i].pos.y = curPoint.z / SCALE;
         car->points[i].pos.z = curPoint.y / SCALE;
-        car->points[i].pos = Vector3Add(car->points[i].pos, offset);
-        if (curPoint.diameter > 0) {
-            car->points[i].diameter = curPoint.diameter / SCALE;
+        if (curPoint.size > 0) {
+            car->points[i].size = curPoint.size / SCALE;
         } else {
-            car->points[i].diameter = 0.0f;
+            car->points[i].size = 0.0f;
         }
 
         switch (curPoint.pointType) {
@@ -109,6 +105,7 @@ static void load_car_chunk2(DFCar* car, FILE* fp)
 static void load_car_chunk3(DFCar* car, FILE* fp)
 {
     uint8_t dtype;
+    int count = 0;
     while (fread(&dtype, sizeof dtype, 1, fp) != 0) {
         switch (dtype) {
         case 0:
@@ -175,7 +172,8 @@ static void load_car_chunk3(DFCar* car, FILE* fp)
             printf("\e[0;36m246:\t");
             fread(&data246, sizeof(uint8_t), 19, fp);
             for (size_t i = 0; i < 19; i++) {
-                printf("%d\t", data246[i]);
+                //printf("%d\t", data246[i]);
+                printf("%02X ", data246[i]);
             }
             break;
             break;
@@ -187,7 +185,9 @@ static void load_car_chunk3(DFCar* car, FILE* fp)
             // printf("- @ %ld\n", ftell(fp) - 1);
             printf("\n");
         }
+        count++;
     }
+    printf("Read %i chunks\n", count);
     printf("\e[0mINFO: CARLOAD: Reached end of car data file (%li)\n", ftell(fp));
 }
 

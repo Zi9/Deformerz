@@ -13,6 +13,7 @@ void Engine_Initialize()
     Renderer_Initialize();
     Engine.car = Assets_LoadDFCar("data/terep/car1.dat");
     Engine.map = Assets_LoadDFMap(Engine.cfg.baseDataPath);
+    DFCamera_SetPos((Vector3) {0, 0, 3});
 }
 
 void Engine_Loop()
