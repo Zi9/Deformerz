@@ -4,7 +4,7 @@ Config Config_Terep()
 {
     Config cfg = {
         .render = {.width = 320, .height = 200, .upscaleMultiplier = 2},
-        .baseDataPath = "./data/terep/",
+        .baseDataPath = "./data/",
         .scenario = "terep",
         .restart = false,
     };

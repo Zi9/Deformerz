@@ -130,17 +130,33 @@ static void load_car_chunk3(DFCar* car, FILE* fp)
         case 4:
             int16_t data4[8];
             uint8_t count4;
+            uint8_t colors4[4];
             fread(&count4, sizeof count4, 1, fp);
             printf("\e[0;33m4-%d:\t", count4);
-            count4 += 2;
             if (count4 > 8) {
                 printf("ChunkID4: Failure when parsing, too many data points\n");
                 return;
             }
+            car->renderableFaces[car->renderableFaceCount].count = count4;
             fread(&data4, sizeof(int16_t), count4, fp);
             for (size_t i = 0; i < count4; i++) {
                 printf("%d\t", data4[i]);
+                uint16_t point = data4[i];
+                if (point % 2 == 0) {
+                    point = data4[i] / 2;
+                } else {
+                    point = (data4[i] / 2) + 1;
+                }
+                car->renderableFaces[car->renderableFaceCount].vertices[i] = point;
             }
+            fread(&colors4, sizeof(uint8_t), 4, fp);
+            car->renderableFaces[car->renderableFaceCount].colors[0] = colors4[2];
+            car->renderableFaces[car->renderableFaceCount].colors[1] = colors4[3];
+            for (size_t i = 0; i < 4; i++) {
+                printf("%d\t", colors4[i]);
+            }
+            car->renderableFaces[car->renderableFaceCount].render = car->renderableFaces[car->renderableFaceCount].colors[0] != 0;
+            car->renderableFaceCount++;
             break;
         case 8:
             uint16_t data8[32];
@@ -172,10 +188,9 @@ static void load_car_chunk3(DFCar* car, FILE* fp)
             printf("\e[0;36m246:\t");
             fread(&data246, sizeof(uint8_t), 19, fp);
             for (size_t i = 0; i < 19; i++) {
-                //printf("%d\t", data246[i]);
+                // printf("%d\t", data246[i]);
                 printf("%02X ", data246[i]);
             }
-            break;
             break;
         default:
             printf("Unknown data block %d", dtype);

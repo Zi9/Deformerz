@@ -1,11 +1,9 @@
 #include "Engine/Core/DFCar.h"
-#include "raylib.h"
+#include "Engine/Engine.h"
+#include "Engine/UI/ImGUI.h"
+#include "cimgui.h"
+#include <raylib.h>
 #include <stdlib.h>
-
-void DrawPhysSeg(DFCar* car, int idx)
-{
-    DrawLine3D(car->points[car->physSegments[idx].pointA].pos, car->points[car->physSegments[idx].pointB].pos, RED);
-}
 
 void Renderer_RenderDFCar(DFCar* car)
 {
@@ -13,18 +11,16 @@ void Renderer_RenderDFCar(DFCar* car)
     for (size_t i = 0; i < car->pointCount; i++) {
         switch (car->points[i].type) {
         case DFCAR_POINT_GEOMETRY:
-            col = BLACK;
+            col = WHITE;
             break;
         case DFCAR_POINT_CAMERA:
             col = MAGENTA;
             break;
         case DFCAR_POINT_WHEEL_FL:
         case DFCAR_POINT_WHEEL_FR:
-            col = BLUE;
-            break;
         case DFCAR_POINT_WHEEL_RL:
         case DFCAR_POINT_WHEEL_RR:
-            col = RED;
+            col = BLUE;
             break;
         }
         DrawCube(car->points[i].pos, 0.02f, 0.02f, 0.02f, col);
@@ -51,11 +47,29 @@ void Renderer_RenderDFCar(DFCar* car)
             col = GREEN;
             break;
         }
-        // DrawLine3D(car->points[car->physSegments[i].pointA].pos, car->points[car->physSegments[i].pointB].pos, col);
-        DrawPhysSeg(car, 43);
-        DrawPhysSeg(car, 33);
-        DrawPhysSeg(car, 21);
-        DrawPhysSeg(car, 39);
-        DrawPhysSeg(car, 43);
     }
+    for (size_t i = 0; i < car->renderableFaceCount; i++) {
+        if (car->renderableFaces[i].render == false)
+            continue;
+        if (car->renderableFaces[i].colors[0] == 255)
+            continue;
+        DrawTriangle3D(car->points[car->renderableFaces[i].vertices[2]].pos, car->points[car->renderableFaces[i].vertices[1]].pos, car->points[car->renderableFaces[i].vertices[0]].pos, Engine.palette[car->renderableFaces[i].colors[0]]);
+        if (car->renderableFaces[i].count == 4) {
+        DrawTriangle3D(car->points[car->renderableFaces[i].vertices[0]].pos, car->points[car->renderableFaces[i].vertices[3]].pos, car->points[car->renderableFaces[i].vertices[2]].pos, Engine.palette[car->renderableFaces[i].colors[0]]);
+        }
+    }
+}
+bool debugActive = true;
+void Renderer_DFCarDebugger(DFCar* car)
+{
+    igSetNextWindowPos((ImVec2){32, 32}, ImGuiCond_Once, (ImVec2){0});
+    igBegin("Car Debug", &debugActive, ImGuiWindowFlags_NoCollapse);
+    igText("Renderables");
+    igPushID_Str("Renderables");
+    for (size_t i = 0; i < car->renderableFaceCount; i++) {
+        char* label = TextFormat("%i - c:%i", i, car->renderableFaces[i].colors[0]);
+        igCheckbox(label, &car->renderableFaces[i].render);
+    }
+    igPopID();
+    igEnd();
 }

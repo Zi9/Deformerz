@@ -10,3 +10,6 @@ void Renderer_Render();
 
 void Renderer_RenderDFCar(DFCar* car);
 void Renderer_RenderDFMap(DFMap* map);
+
+
+void Renderer_DFCarDebugger(DFCar* car);

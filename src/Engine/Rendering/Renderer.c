@@ -31,7 +31,7 @@ void Renderer_Render()
     Renderer_RenderDFCar(Engine.car);
     DFCamera_EndRender();
     rlImGuiBegin();
-
+    Renderer_DFCarDebugger(Engine.car);
     rlImGuiEnd();
     int height = GetScreenHeight();
     DrawText(WMARK, 0, height - 18, 20, BLACK);

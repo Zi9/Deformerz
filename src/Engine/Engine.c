@@ -11,7 +11,8 @@ void Engine_Initialize()
     SetTraceLogLevel(LOG_ERROR);
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     Renderer_Initialize();
-    Engine.car = Assets_LoadDFCar("data/terep/car1.dat");
+    SetTargetFPS(60);
+    Engine.car = Assets_LoadDFCar("data/car2.dat");
     Engine.map = Assets_LoadDFMap(Engine.cfg.baseDataPath);
     DFCamera_SetPos((Vector3) {0, 0, 3});
 }

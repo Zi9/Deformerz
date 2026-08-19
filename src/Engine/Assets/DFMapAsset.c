@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "Engine/Rendering/Shaders.h"
 #include "PCX.h"
@@ -95,9 +96,14 @@ static void build_map_model(DFMap* map)
 
 static void set_sky_color_hook(PCXData* pcx)
 {
-    Engine.skyColor.r = pcx->palette[255].red;
-    Engine.skyColor.g = pcx->palette[255].green;
-    Engine.skyColor.b = pcx->palette[255].blue;
+    for (size_t i = 0; i < 256; i++)
+    {
+        Engine.palette[i].r = pcx->palette[i].red;
+        Engine.palette[i].g = pcx->palette[i].green;
+        Engine.palette[i].b = pcx->palette[i].blue;
+        Engine.palette[i].a = 255;
+    }
+    Engine.skyColor = Engine.palette[255];
 }
 
 DFMap* Assets_LoadDFMap(const char* basePath)

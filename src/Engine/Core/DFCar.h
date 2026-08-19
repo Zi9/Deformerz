@@ -33,6 +33,13 @@ typedef struct DFCarPhysSegment {
     uint16_t other1, other2, other3, other4;
 } DFCarPhysSegment;
 
+typedef struct DFCarRenderableFace {
+    uint8_t count;
+    uint16_t vertices[5]; // NOTE: This is a hard limit, maybe increase in future if needed
+    uint8_t colors[2];
+    bool render;
+} DFCarRenderableFace;
+
 typedef struct DFCar {
     uint16_t pointCount;
     DFCarPoint points[128];
@@ -40,5 +47,9 @@ typedef struct DFCar {
     uint16_t physSegmentCount;
     DFCarPhysSegment physSegments[256];
 
+    uint16_t renderableFaceCount;
+    DFCarRenderableFace renderableFaces[128];
+
     uint8_t drivetrainMode;
+
 } DFCar;
