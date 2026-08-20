@@ -16,10 +16,8 @@ void Renderer_RenderDFCar(DFCar* car)
         case DFCAR_POINT_CAMERA:
             col = MAGENTA;
             break;
-        case DFCAR_POINT_WHEEL_FL:
-        case DFCAR_POINT_WHEEL_FR:
-        case DFCAR_POINT_WHEEL_RL:
-        case DFCAR_POINT_WHEEL_RR:
+        case DFCAR_POINT_WHEEL_FRONT:
+        case DFCAR_POINT_WHEEL_REAR:
             col = BLUE;
             break;
         }
