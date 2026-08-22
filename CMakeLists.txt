@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(Deformers C CXX)
+project(Deformerz C CXX)
 
 file(GLOB_RECURSE SRC src/*.c)
 file(GLOB SRC_RLIMGUI vendor/rlImGui/*.cpp)
@@ -22,9 +22,9 @@ add_custom_command(
     DEPENDS ./src/Engine/Rendering/Shaders/Affine.fs ./src/Engine/Rendering/Shaders/Affine.vs
 )
 
-add_executable(Deformers ${SRC} ${SRC_RLIMGUI} src/Engine/Rendering/Shaders.h)
+add_executable(Deformerz ${SRC} ${SRC_RLIMGUI} src/Engine/Rendering/Shaders.h)
 
-target_include_directories(Deformers PUBLIC src)
-target_include_directories(Deformers PUBLIC vendor/rlImGui)
+target_include_directories(Deformerz PUBLIC src)
+target_include_directories(Deformerz PUBLIC vendor/rlImGui)
 
-target_link_libraries(Deformers raylib cimgui m)
+target_link_libraries(Deformerz raylib cimgui m)
