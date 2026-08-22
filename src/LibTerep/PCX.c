@@ -31,12 +31,11 @@ struct __attribute__((__packed__)) PCXHeader {
     uint16_t paletteInfo;
 };
 
-
 void (*PCX_postprocess_callback)(PCXData*) = NULL;
 
-static struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
+static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
 {
-    struct PCXData* pcx = malloc(sizeof *pcx);
+    PCXData* pcx = malloc(sizeof(PCXData));
     FILE* fp = fopen(path, "r");
     if (fp == NULL) {
         printf("Unable to open PCX image %s for reading\n", path);
@@ -77,21 +76,25 @@ static struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint
     }
     free(hdr);
 
-    // *Resizing routine
-    pcx->indices = malloc(targ_width * targ_height * sizeof *pcx->indices);
-    if (height >= targ_height) {
-        for (size_t y = 0; y < targ_height; y++) {
-            memcpy(pcx->indices + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
+    // *Resizing routine if requested
+    if (targ_width != width && targ_height != height) {
+        pcx->indices = malloc(targ_width * targ_height * sizeof *pcx->indices);
+        if (height >= targ_height) {
+            for (size_t y = 0; y < targ_height; y++) {
+                memcpy(pcx->indices + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
+            }
+        } else {
+            size_t wrote_pixels = 0;
+            for (size_t y = 0; y < height; y++) {
+                memcpy(pcx->indices + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
+                wrote_pixels += targ_width * sizeof(uint8_t);
+            }
+            memset(pcx->indices + wrote_pixels, 0xFF, (targ_width * targ_height * sizeof(uint8_t)) - wrote_pixels);
         }
+        free(buf);
     } else {
-        size_t wrote_pixels = 0;
-        for (size_t y = 0; y < height; y++) {
-            memcpy(pcx->indices + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
-            wrote_pixels += targ_width * sizeof(uint8_t);
-        }
-        memset(pcx->indices + wrote_pixels, 0xFF, (targ_width * targ_height * sizeof(uint8_t)) - wrote_pixels);
+        pcx->indices = buf;
     }
-    free(buf);
 
     uint8_t palmagic;
     fread(&palmagic, sizeof(palmagic), 1, fp);
@@ -109,32 +112,32 @@ static struct PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint
 
 uint8_t* PCX_LoadArray(const char* path)
 {
-    struct PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
+    PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
     uint8_t* array = pcx->indices;
     free(pcx);
     return array;
 }
-Image PCX_LoadImage(const char* path)
+PCXImage* PCX_LoadImage(const char* path)
 {
-    struct PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
+    PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
 
-    Image img = {0};
-    Color* pix = malloc(PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE * sizeof *pix);
+    PCXImage* img = malloc(sizeof(PCXImage));
+    struct RGBAColor* pix = malloc(PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE * sizeof *pix);
     for (size_t i = 0; i < PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE; i++) {
-        pix[i].r = pcx->palette[pcx->indices[i]].red;
-        pix[i].g = pcx->palette[pcx->indices[i]].green;
-        pix[i].b = pcx->palette[pcx->indices[i]].blue;
+        pix[i].red = pcx->palette[pcx->indices[i]].red;
+        pix[i].green = pcx->palette[pcx->indices[i]].green;
+        pix[i].blue = pcx->palette[pcx->indices[i]].blue;
         if (pcx->indices[i] == 255) {
-            pix[i].a = 0;
+            pix[i].alpha = 0;
         } else {
-            pix[i].a = 255;
+            pix[i].alpha = 255;
         }
     }
-    img.data = pix;
-    img.width = PCX_DEFAULT_SIZE;
-    img.height = PCX_DEFAULT_SIZE;
-    img.format = 7;
-    img.mipmaps = 1;
+    img->data = pix;
+    img->width = PCX_DEFAULT_SIZE;
+    img->height = PCX_DEFAULT_SIZE;
+    img->format = 7;
+    img->mipmaps = 1;
     free(pcx->indices);
     free(pcx);
     return img;

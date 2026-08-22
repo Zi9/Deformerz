@@ -1,20 +1,22 @@
 #pragma once
 
-#include "Config.h"
-#include "Core/DFCar.h"
-#include "Core/DFMap.h"
+#include "LibTerep/TerepCar.h"
+#include "LibTerep/TerepMap.h"
+#include <raylib.h>
+
+#define GAME_WINDOW_TITLE "Deformerz - A recreation of Terep2"
+#define WMARK "Deformerz - v0.1"
 
 typedef struct EngineData {
     float dt;
     float time;
-    Config cfg;
 
-    DFCar* car;
-    DFMap* map;
+    TerepCar* car;
+    TerepMap* map;
     Color skyColor;
     Color palette[256];
 } EngineData;
 
 extern EngineData Engine;
 
-Config Engine_Main(Config cfg);
+void Engine_Main();

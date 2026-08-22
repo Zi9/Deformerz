@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include "DFCamera.h"
+#include "Engine/Debug/Debug.h"
 #include "Engine/Engine.h"
 #include "Engine/UI/ImGUI.h"
 #include <raylib.h>
@@ -12,9 +13,10 @@
 
 void Renderer_Initialize()
 {
-    InitWindow(Engine.cfg.render.width, Engine.cfg.render.height, GAME_WINDOW_TITLE);
-    SetTargetFPS(Engine.cfg.render.targetFPS);
+    InitWindow(1920, 1080, GAME_WINDOW_TITLE);
+    SetTargetFPS(60);
     rlImGuiSetup(true);
+    Engine.skyColor = (Color){40, 40, 40, 255};
 }
 void Renderer_Destroy()
 {
@@ -27,11 +29,10 @@ void Renderer_Render()
     BeginDrawing();
     ClearBackground(Engine.skyColor);
     DFCamera_BeginRender();
-    Renderer_RenderDFMap(Engine.map);
-    Renderer_RenderDFCar(Engine.car);
+    Renderer_RenderCar(Engine.car);
     DFCamera_EndRender();
     rlImGuiBegin();
-    Renderer_DFCarDebugger(Engine.car);
+    //Debug_RenderCarDebugger(Engine.car);
     rlImGuiEnd();
     int height = GetScreenHeight();
     DrawText(WMARK, 0, height - 18, 20, BLACK);

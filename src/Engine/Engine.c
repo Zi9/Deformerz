@@ -1,5 +1,4 @@
 #include "Engine.h"
-#include "Assets/AssetManager.h"
 #include "Engine/Rendering/DFCamera.h"
 #include "Rendering/Renderer.h"
 #include <raylib.h>
@@ -12,8 +11,8 @@ void Engine_Initialize()
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     Renderer_Initialize();
     SetTargetFPS(60);
-    Engine.car = Assets_LoadDFCar("data/car2.dat");
-    Engine.map = Assets_LoadDFMap(Engine.cfg.baseDataPath);
+    Engine.car = TerepCar_Load("data/car1.dat", "data/car1.pcx");
+    //Engine.map = TerepMap_Load("data/col.pcx", "data/map.pcx", "data/maptex.pcx");
     DFCamera_SetPos((Vector3) {0, 0, 3});
 }
 
@@ -28,19 +27,17 @@ void Engine_Loop()
 void Engine_Destroy()
 {
     Renderer_Destroy();
-    Assets_UnloadDFCar(Engine.car);
-    Assets_UnloadDFMap(Engine.map);
+    TerepCar_Unload(Engine.car);
+    //TerepMap_Unload(Engine.map);
 }
 
-Config Engine_Main(Config cfg)
+void Engine_Main()
 {
-    Engine.cfg = cfg;
     Engine_Initialize();
     while (!WindowShouldClose()) {
         Engine_Loop();
     }
     Engine_Destroy();
-    return Engine.cfg;
 }
 
 /*

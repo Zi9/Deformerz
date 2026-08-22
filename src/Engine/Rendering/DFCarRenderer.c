@@ -1,73 +1,136 @@
-#include "Engine/Core/DFCar.h"
 #include "Engine/Engine.h"
-#include "Engine/UI/ImGUI.h"
-#include "cimgui.h"
+#include "LibTerep/TerepCar.h"
 #include <raylib.h>
+#include <rlgl.h>
 #include <stdlib.h>
+#include <string.h>
 
-void Renderer_RenderDFCar(DFCar* car)
+static inline Vector3 ToVector3(float v[3]) { return (Vector3){v[0], v[1], v[2]}; }
+
+static void RenderPoint(TerepCarPoint* point)
 {
     Color col;
-    for (size_t i = 0; i < car->pointCount; i++) {
-        switch (car->points[i].type) {
-        case DFCAR_POINT_GEOMETRY:
-            col = WHITE;
-            break;
-        case DFCAR_POINT_CAMERA:
-            col = MAGENTA;
-            break;
-        case DFCAR_POINT_WHEEL_FRONT:
-        case DFCAR_POINT_WHEEL_REAR:
-            col = BLUE;
-            break;
-        }
-        DrawCube(car->points[i].pos, 0.02f, 0.02f, 0.02f, col);
-        if (car->points[i].size > 0) {
-            if (car->points[i].type == DFCAR_POINT_CAMERA) {
-                DrawSphere(car->points[i].pos, car->points[i].size, PINK);
-            } else {
-                DrawCircle3D(car->points[i].pos, car->points[i].size, (Vector3){0.0f, 1.0f, 0.0f}, 90, PINK);
-            }
-        }
+    switch (point->type) {
+    case TEREP_POINT_GEOMETRY:
+        col = WHITE;
+        break;
+    case TEREP_POINT_CAMERA:
+        col = MAGENTA;
+        break;
+    case TEREP_POINT_WHEEL_FRONT:
+    case TEREP_POINT_WHEEL_REAR:
+        col = BLUE;
+        break;
     }
-    for (size_t i = 0; i < car->physSegmentCount; i++) {
-        switch (car->physSegments[i].type) {
-        case DFCAR_SEGMENT_NORMAL:
-            col = WHITE;
-            break;
-        case DFCAR_SEGMENT_SUSP_FRONT:
-            col = BLUE;
-            break;
-        case DFCAR_SEGMENT_SUSP_REAR:
-            col = RED;
-            break;
-        case DFCAR_SEGMENT_SUSP_EXTRA:
-            col = GREEN;
-            break;
-        }
-    }
-    for (size_t i = 0; i < car->renderableFaceCount; i++) {
-        if (car->renderableFaces[i].render == false)
-            continue;
-        if (car->renderableFaces[i].colors[0] == 255)
-            continue;
-        DrawTriangle3D(car->points[car->renderableFaces[i].vertices[2]].pos, car->points[car->renderableFaces[i].vertices[1]].pos, car->points[car->renderableFaces[i].vertices[0]].pos, Engine.palette[car->renderableFaces[i].colors[0]]);
-        if (car->renderableFaces[i].count == 4) {
-        DrawTriangle3D(car->points[car->renderableFaces[i].vertices[0]].pos, car->points[car->renderableFaces[i].vertices[3]].pos, car->points[car->renderableFaces[i].vertices[2]].pos, Engine.palette[car->renderableFaces[i].colors[0]]);
+    Vector3 pos = ToVector3(point->pos);
+    DrawCube(pos, 0.02f, 0.02f, 0.02f, col);
+    if (point->size > 0) {
+        if (point->type == TEREP_POINT_CAMERA) {
+            DrawSphere(pos, point->size, PINK);
+        } else {
+            DrawCircle3D(pos, point->size, (Vector3){0.0f, 1.0f, 0.0f}, 90, PINK);
         }
     }
 }
-bool debugActive = true;
-void Renderer_DFCarDebugger(DFCar* car)
+
+static void RenderPhysicsSegment(TerepCarPhysSegment* seg, TerepCarPoint* points)
 {
-    igSetNextWindowPos((ImVec2){32, 32}, ImGuiCond_Once, (ImVec2){0});
-    igBegin("Car Debug", &debugActive, ImGuiWindowFlags_NoCollapse);
-    igText("Renderables");
-    igPushID_Str("Renderables");
-    for (size_t i = 0; i < car->renderableFaceCount; i++) {
-        char* label = TextFormat("%i - c:%i", i, car->renderableFaces[i].colors[0]);
-        igCheckbox(label, &car->renderableFaces[i].render);
+    Color col;
+    switch (seg->type) {
+    case TEREP_SEGMENT_NORMAL:
+        col = WHITE;
+        break;
+    case TEREP_SEGMENT_SUSP_FRONT:
+    case TEREP_SEGMENT_SUSP_FRONT2:
+        col = BLUE;
+        break;
+    case TEREP_SEGMENT_SUSP_REAR:
+    case TEREP_SEGMENT_SUSP_REAR2:
+        col = RED;
+        break;
+    case TEREP_SEGMENT_SUSP_EXTRA:
+        col = GREEN;
+        break;
     }
-    igPopID();
-    igEnd();
+    DrawLine3D(ToVector3(points[seg->pointA].pos), ToVector3(points[seg->pointB].pos), col);
+}
+
+static void RenderPolygon(TerepCarPolygon* face, TerepCarPoint* points)
+{
+    Color color = WHITE;
+    rlBegin(RL_TRIANGLES);
+    if (face->type == TEREP_POLYGON_COLOR)
+        color = Engine.palette[face->colors[0]];
+    rlColor4ub(color.r, color.g, color.b, color.a);
+
+    switch (face->pointCount) {
+    case 3:
+        color = RED;
+        rlColor4ub(color.r, color.g, color.b, color.a);
+        rlVertex3f(points[face->vertices[2]].pos[0], points[face->vertices[2]].pos[1],
+                   points[face->vertices[2]].pos[2]);
+        rlVertex3f(points[face->vertices[1]].pos[0], points[face->vertices[1]].pos[1],
+                   points[face->vertices[1]].pos[2]);
+        rlVertex3f(points[face->vertices[0]].pos[0], points[face->vertices[0]].pos[1],
+                   points[face->vertices[0]].pos[2]);
+        break;
+    case 4:
+        color = RED;
+        rlColor4ub(color.r, color.g, color.b, color.a);
+        rlVertex3f(points[face->vertices[2]].pos[0], points[face->vertices[2]].pos[1],
+                   points[face->vertices[2]].pos[2]);
+        rlVertex3f(points[face->vertices[1]].pos[0], points[face->vertices[1]].pos[1],
+                   points[face->vertices[1]].pos[2]);
+        rlVertex3f(points[face->vertices[0]].pos[0], points[face->vertices[0]].pos[1],
+                   points[face->vertices[0]].pos[2]);
+        color = GREEN;
+        rlColor4ub(color.r, color.g, color.b, color.a);
+        rlVertex3f(points[face->vertices[0]].pos[0], points[face->vertices[0]].pos[1],
+                   points[face->vertices[0]].pos[2]);
+        rlVertex3f(points[face->vertices[3]].pos[0], points[face->vertices[3]].pos[1],
+                   points[face->vertices[3]].pos[2]);
+        rlVertex3f(points[face->vertices[2]].pos[0], points[face->vertices[2]].pos[1],
+                   points[face->vertices[2]].pos[2]);
+        break;
+    case 5:
+        color = RED;
+        rlColor4ub(color.r, color.g, color.b, color.a);
+        rlVertex3f(points[face->vertices[2]].pos[0], points[face->vertices[2]].pos[1],
+                   points[face->vertices[2]].pos[2]);
+        rlVertex3f(points[face->vertices[1]].pos[0], points[face->vertices[1]].pos[1],
+                   points[face->vertices[1]].pos[2]);
+        rlVertex3f(points[face->vertices[0]].pos[0], points[face->vertices[0]].pos[1],
+                   points[face->vertices[0]].pos[2]);
+        color = GREEN;
+        rlColor4ub(color.r, color.g, color.b, color.a);
+        rlVertex3f(points[face->vertices[0]].pos[0], points[face->vertices[0]].pos[1],
+                   points[face->vertices[0]].pos[2]);
+        rlVertex3f(points[face->vertices[4]].pos[0], points[face->vertices[4]].pos[1],
+                   points[face->vertices[4]].pos[2]);
+        rlVertex3f(points[face->vertices[2]].pos[0], points[face->vertices[2]].pos[1],
+                   points[face->vertices[2]].pos[2]);
+        color = BLUE;
+        rlColor4ub(color.r, color.g, color.b, color.a);
+        rlVertex3f(points[face->vertices[4]].pos[0], points[face->vertices[4]].pos[1],
+                   points[face->vertices[4]].pos[2]);
+        rlVertex3f(points[face->vertices[3]].pos[0], points[face->vertices[3]].pos[1],
+                   points[face->vertices[3]].pos[2]);
+        rlVertex3f(points[face->vertices[2]].pos[0], points[face->vertices[2]].pos[1],
+                   points[face->vertices[2]].pos[2]);
+        break;
+    }
+    rlEnd();
+}
+
+void Renderer_RenderCar(TerepCar* car)
+{
+    for (size_t i = 0; i < car->pointCount; i++) {
+        RenderPoint(&car->points[i]);
+    }
+    for (size_t i = 0; i < car->physSegmentCount; i++) {
+        RenderPhysicsSegment(&car->physSegments[i], car->points);
+    }
+    for (size_t i = 0; i < car->polygonCount; i++) {
+        RenderPolygon(&car->polygons[i], car->points);
+    }
 }
