@@ -1,14 +1,13 @@
 #pragma once
 
-#include "LibTerep/TerepCar.h"
-//#include "Engine/Core/DFMap.h"
+#include "Engine/Core/DFCar.h"
 
 void Renderer_Initialize();
 void Renderer_Destroy();
 
 void Renderer_Render();
 
-void Renderer_RenderCar(TerepCar* car);
+void Renderer_RenderCar(DFCar* car);
 //void Renderer_RenderDFMap(DFMap* map);
 
 

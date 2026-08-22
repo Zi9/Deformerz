@@ -1,5 +1,5 @@
 #pragma once
 
-#include "LibTerep/TerepCar.h"
+#include "Engine/Core/DFCar.h"
 
-void Debug_RenderCarDebugger(TerepCar* car);
+void Debug_RenderCarDebugger(DFCar* car);

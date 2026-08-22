@@ -1,6 +1,7 @@
+#include "Engine/Core/DFCar.h"
 #include "Engine/UI/ImGUI.h"
-#include "LibTerep/TerepCar.h"
 #include "cimgui.h"
+#include "raylib.h"
 #include <string.h>
 
 bool debugActive = true;
@@ -54,8 +55,9 @@ static const char* get_face_type(TerepCarPolygon* face)
     return tempSTR;
 }
 
-void Debug_RenderCarDebugger(TerepCar* car)
+void Debug_RenderCarDebugger(DFCar* dfcar)
 {
+    TerepCar* car = dfcar->car;
     igSetNextWindowPos((ImVec2){32, 32}, ImGuiCond_Once, (ImVec2){0});
     igBegin("Car Debug", &debugActive, ImGuiWindowFlags_NoCollapse);
     if (igTreeNode_Str("Points")) {
@@ -127,4 +129,14 @@ void Debug_RenderCarDebugger(TerepCar* car)
         igTreePop();
     }
     igEnd();
+
+    DrawTexture(dfcar->carTex, 0, 0, WHITE);
+    for (size_t i = 0; i < car->polygonCount; i++) {
+        TerepCarPolygon p = car->polygons[i];
+        if (p.type != TEREP_POLYGON_TEXTURE)
+            continue;
+        for (size_t j = 0; j < p.pointCount; j++) {
+            DrawPixel(p.uv[j].x/65535.0*256.0, p.uv[j].y/65535.0*256.0, GREEN);
+        }
+    }
 }
