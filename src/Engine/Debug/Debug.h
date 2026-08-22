@@ -2,4 +2,4 @@
 
 #include "LibTerep/TerepCar.h"
 
-//void Debug_RenderCarDebugger(TerepCar* car);
+void Debug_RenderCarDebugger(TerepCar* car);

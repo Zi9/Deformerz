@@ -53,7 +53,7 @@ static const char* get_face_type(TerepCarPolygon* face)
     }
     return tempSTR;
 }
-/*
+
 void Debug_RenderCarDebugger(TerepCar* car)
 {
     igSetNextWindowPos((ImVec2){32, 32}, ImGuiCond_Once, (ImVec2){0});
@@ -61,9 +61,8 @@ void Debug_RenderCarDebugger(TerepCar* car)
     if (igTreeNode_Str("Points")) {
         igPushID_Str("Points");
         for (size_t i = 0; i < car->pointCount; i++) {
-            igCheckbox(TextFormat("%i - %s (%f, %f, %f) S:%f", i, get_point_type(&car->points[i]), car->points[i].pos.x,
-                                  car->points[i].pos.y, car->points[i].pos.z, car->points[i].size),
-                       &car->points[i].debugRender);
+            igLabelText("##", "%i - %s (%f, %f, %f) S:%f", i, get_point_type(&car->points[i]), car->points[i].pos[0],
+                        car->points[i].pos[1], car->points[i].pos[2], car->points[i].size);
         }
         igSeparator();
         igPopID();
@@ -73,9 +72,8 @@ void Debug_RenderCarDebugger(TerepCar* car)
     if (igTreeNode_Str("PhysicsSegments")) {
         igPushID_Str("PhysSeg");
         for (size_t i = 0; i < car->physSegmentCount; i++) {
-            igCheckbox(TextFormat("%i - %s = %i <-> %i", i, get_phys_type(&car->physSegments[i]),
-                                  car->physSegments[i].pointA, car->physSegments[i].pointB),
-                       &car->physSegments[i].debugRender);
+            igLabelText("##", "%i - %s = %i <-> %i", i, get_phys_type(&car->physSegments[i]),
+                        car->physSegments[i].pointA, car->physSegments[i].pointB);
         }
         igSeparator();
         igPopID();
@@ -84,16 +82,21 @@ void Debug_RenderCarDebugger(TerepCar* car)
 
     if (igTreeNode_Str("Renderables")) {
         igPushID_Str("Renderables");
-        for (size_t i = 0; i < car->renderableFaceCount; i++) {
-            if (igTreeNode_Str(TextFormat("%i - %s (%i)", i, get_face_type(&car->renderableFaces[i]), car->renderableFaces[i].count))) {
-                igCheckbox("Render", &car->renderableFaces[i].debugRender);
-                igLabelText("##", "0: %i - %i, %i", car->renderableFaces[i].vertices[0], car->renderableFaces[i].uv[0].x, car->renderableFaces[i].uv[0].y);
-                igLabelText("##", "1: %i - %i, %i", car->renderableFaces[i].vertices[1], car->renderableFaces[i].uv[1].x, car->renderableFaces[i].uv[1].y);
-                igLabelText("##", "2: %i - %i, %i", car->renderableFaces[i].vertices[2], car->renderableFaces[i].uv[2].x, car->renderableFaces[i].uv[2].y);
-                if (car->renderableFaces[i].count > 3)
-                    igLabelText("##", "3: %i - %i, %i", car->renderableFaces[i].vertices[3], car->renderableFaces[i].uv[3].x, car->renderableFaces[i].uv[3].y);
-                if (car->renderableFaces[i].count > 4)
-                    igLabelText("##", "4: %i - %i, %i", car->renderableFaces[i].vertices[4], car->renderableFaces[i].uv[4].x, car->renderableFaces[i].uv[4].y);
+        for (size_t i = 0; i < car->polygonCount; i++) {
+            if (igTreeNode_Str(
+                    TextFormat("%i - %s (%i)", i, get_face_type(&car->polygons[i]), car->polygons[i].pointCount))) {
+                igLabelText("##", "0: %i - %i, %i", car->polygons[i].vertices[0], car->polygons[i].uv[0].x,
+                            car->polygons[i].uv[0].y);
+                igLabelText("##", "1: %i - %i, %i", car->polygons[i].vertices[1], car->polygons[i].uv[1].x,
+                            car->polygons[i].uv[1].y);
+                igLabelText("##", "2: %i - %i, %i", car->polygons[i].vertices[2], car->polygons[i].uv[2].x,
+                            car->polygons[i].uv[2].y);
+                if (car->polygons[i].pointCount > 3)
+                    igLabelText("##", "3: %i - %i, %i", car->polygons[i].vertices[3], car->polygons[i].uv[3].x,
+                                car->polygons[i].uv[3].y);
+                if (car->polygons[i].pointCount > 4)
+                    igLabelText("##", "4: %i - %i, %i", car->polygons[i].vertices[4], car->polygons[i].uv[4].x,
+                                car->polygons[i].uv[4].y);
                 igTreePop();
             }
         }
@@ -125,4 +128,3 @@ void Debug_RenderCarDebugger(TerepCar* car)
     }
     igEnd();
 }
-*/
