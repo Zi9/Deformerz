@@ -1,4 +1,4 @@
-# Terep2 Car DAT File Format
+# Terep2 DAT Car Model File Format
 
 This document is the result of reverse engineering the Terep2 car data files in an attempt to fully understand them and to aid in building LibTerep car support. This file may not be 100% correct and matching the original implementation, however it is a best effort document based on reverse engineering of the files.
 
