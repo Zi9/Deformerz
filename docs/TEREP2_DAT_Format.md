@@ -84,7 +84,7 @@ This chunk contains an array of physics segment (link between 2 points) definiti
 
 ### The Variable Length Definitions Chunk
 
-This chunk contains an array of elements where each item is prefixed by an ID. Elements have a fixed size that differs from one to another. Most of the elements are polygon definitions. The chunk goes on until the end of the file. Usually the file ends with a null entry.
+This chunk contains an array of elements where each item is prefixed by an ID. Elements have a fixed size that differs from one to another. Most of the elements are polygon definitions. The chunk goes on until the end of the file. Usually the file ends with a null entry. This chunk does not start with a count of items unlike the previous two chunks.
 
 #### Variable Length Definition Types
 
