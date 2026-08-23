@@ -112,9 +112,9 @@ PCXImage* PCX_LoadImage(const char* path)
     struct RGBAColor* pix = malloc(PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE * sizeof *pix);
     if (USE_GLOBAL_PALETTE_FOR_LOADING) {
         for (size_t i = 0; i < PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE; i++) {
-            pix[i].red = GLOBAL_PALETTE[pcx->data[i]].red;
-            pix[i].green = GLOBAL_PALETTE[pcx->data[i]].green;
-            pix[i].blue = GLOBAL_PALETTE[pcx->data[i]].blue;
+            pix[i].red = PCX_GLOBAL_PALETTE[pcx->data[i]].red;
+            pix[i].green = PCX_GLOBAL_PALETTE[pcx->data[i]].green;
+            pix[i].blue = PCX_GLOBAL_PALETTE[pcx->data[i]].blue;
             if (pcx->data[i] == 255) {
                 pix[i].alpha = 0;
             } else {
