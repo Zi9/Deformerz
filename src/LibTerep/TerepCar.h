@@ -9,10 +9,10 @@
 #define TEREP_MAX_POLYGON_POINTS 5
 
 typedef enum {
+    TEREP_POINT_CAMERA = -1,
     TEREP_POINT_GEOMETRY = 0,
     TEREP_POINT_WHEEL_REAR = 1,
-    TEREP_POINT_WHEEL_FRONT = 2,
-    TEREP_POINT_CAMERA = 65535
+    TEREP_POINT_WHEEL_FRONT = 2
 } TerepPointType;
 
 typedef enum {

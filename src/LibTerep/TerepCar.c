@@ -52,7 +52,7 @@ static void parse_chunk1(TerepCar* car, TerepDat* dat)
         car->points[i].pos[2] = GetI32(dat->cur, 4) / SCALE;
         int32_t size = GetI32(dat->cur, 22);
         car->points[i].size = size > 0 ? size / SCALE : 0.0f;
-        car->points[i].type = (TerepPointType)GetU16(dat->cur, 26);
+        car->points[i].type = (TerepPointType)GetI16(dat->cur, 26);
         if (car->points[i].type > 2 && car->points[i].type != 65535) {
             printf("LibTerep | ERROR: Failure parsing %s -- Unknown type point: %i\n", dat->name, car->points[i].type);
         }
