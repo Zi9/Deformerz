@@ -4,7 +4,7 @@ This document is the result of reverse engineering the Terep2 car data files in 
 
 ## Background
 
-Terep2 expects 1-5 car dat files to be in the current folder and reads them sequentially. File name format corresponds to `CAR{ID}.DAT`with `ID` being a number from 1 to 5. Terep2 internally loads the data file by issuing an INT 21,3F call to read from a file with CX (number of bytes to read) set to 10000. Imposing a limit of 10000 bytes max file size for the dat files (not verified if the engine can handle a file this large yet).
+Terep2 expects 1-5 car DAT files to be in the current folder and reads them sequentially. File name format corresponds to `CAR{ID}.DAT`with `ID` being a number from 1 to 5. Terep2 internally loads the data file by issuing an INT 21,3F call to read from a file with CX (number of bytes to read) set to 10000. Imposing a limit of 10000 bytes max file size for the DAT files (not verified if the engine can handle a file this large yet).
 
 Terep2 also processes the data on load in various ways which still need to be fully reverse engineered to understand. Some of it my be related to conversions to floating point numbers as the file holds only integer data on disk.
 
