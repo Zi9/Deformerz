@@ -103,7 +103,7 @@ These are always 1 byte unlike all other definition types.
 
 Following tables list the structure of each entry. Each items definition starts after the ID byte.
 
-##### Camera Property Item
+##### Camera Property Item (ID 1 - 0x01)
 
 This item is always 4 bytes.
 
@@ -113,7 +113,7 @@ This item is always 4 bytes.
 | 2      | uint8    | Unknown value, usually 15                                             |
 | 3      | uint8    | Unknown value, usually 15                                             |
 
-##### Colored Polygon Item
+##### Colored Polygon Item (ID 4 - 0x04)
 
 This item is variable length based on the amount of points defined in the polygon. The color items can be set independently, if they differ then the game dithers between the two colors for the polygon.
 
@@ -126,7 +126,7 @@ This item is variable length based on the amount of points defined in the polygo
 
 The color also has some special colors which may get rendered transparently or not visible at all. Color 240 (0xF0) appears to be invisible. Colors originate from the "Master palette" which gets loaded from `COL.PCX`.
 
-##### Textured Polygon Item
+##### Textured Polygon Item (ID 8 - 0x08)
 
 This item is variable length based on the amount of points defined in the polygon. The index and UV data repeats for count (IDX, UVx, UVy).
 
@@ -139,7 +139,7 @@ This item is variable length based on the amount of points defined in the polygo
 
 Sidenote, the game bundles textures with a size of 320x200 but discards the 64 pixels on the right side as the texture is constrained to 256 pixels wide.
 
-##### Wheel Properties Item
+##### Wheel Properties Item (ID 10 - 0x0A)
 
 This item is always 6 bytes in size.
 
