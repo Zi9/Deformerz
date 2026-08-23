@@ -31,6 +31,9 @@ struct __attribute__((__packed__)) PCXHeader {
     uint16_t paletteInfo;
 };
 
+bool USE_GLOBAL_PALETTE_FOR_LOADING = false;
+struct RGBColor PCX_GLOBAL_PALETTE[256] = {0};
+
 static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
 {
     PCXData* pcx = malloc(sizeof(PCXData));
@@ -107,14 +110,27 @@ PCXImage* PCX_LoadImage(const char* path)
     PCXImage* img = malloc(sizeof(PCXImage));
     memcpy(img->palette, pcx->palette, PCX_PALETTE_SIZE);
     struct RGBAColor* pix = malloc(PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE * sizeof *pix);
-    for (size_t i = 0; i < PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE; i++) {
-        pix[i].red = pcx->palette[pcx->data[i]].red;
-        pix[i].green = pcx->palette[pcx->data[i]].green;
-        pix[i].blue = pcx->palette[pcx->data[i]].blue;
-        if (pcx->data[i] == 255) {
-            pix[i].alpha = 0;
-        } else {
-            pix[i].alpha = 255;
+    if (USE_GLOBAL_PALETTE_FOR_LOADING) {
+        for (size_t i = 0; i < PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE; i++) {
+            pix[i].red = GLOBAL_PALETTE[pcx->data[i]].red;
+            pix[i].green = GLOBAL_PALETTE[pcx->data[i]].green;
+            pix[i].blue = GLOBAL_PALETTE[pcx->data[i]].blue;
+            if (pcx->data[i] == 255) {
+                pix[i].alpha = 0;
+            } else {
+                pix[i].alpha = 255;
+            }
+        }
+    } else {
+        for (size_t i = 0; i < PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE; i++) {
+            pix[i].red = pcx->palette[pcx->data[i]].red;
+            pix[i].green = pcx->palette[pcx->data[i]].green;
+            pix[i].blue = pcx->palette[pcx->data[i]].blue;
+            if (pcx->data[i] == 255) {
+                pix[i].alpha = 0;
+            } else {
+                pix[i].alpha = 255;
+            }
         }
     }
     img->data = pix;
@@ -124,3 +140,16 @@ PCXImage* PCX_LoadImage(const char* path)
     free(pcx);
     return img;
 }
+
+void PCX_EnableGlobalPalette(const char* path)
+{
+    FILE* fp = fopen(path, "r");
+    // Something funky here but it works so...
+    fseek(fp, 0, SEEK_END);
+    unsigned long end = ftell(fp);
+    fseek(fp, end - PCX_PALETTE_SIZE, SEEK_SET);
+    fread(&PCX_GLOBAL_PALETTE, sizeof(PCX_GLOBAL_PALETTE), 1, fp);
+    fclose(fp);
+    USE_GLOBAL_PALETTE_FOR_LOADING = true;
+}
+void PCX_DisableGlobalPalette() { USE_GLOBAL_PALETTE_FOR_LOADING = false; }

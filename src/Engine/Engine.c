@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "Engine/Rendering/DFCamera.h"
+#include "LibTerep/PCX.h"
 #include "Rendering/Renderer.h"
 #include <raylib.h>
 
@@ -11,6 +12,7 @@ void Engine_Initialize()
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     Renderer_Initialize();
     SetTargetFPS(60);
+    PCX_EnableGlobalPalette("./data/col.pcx");
     Engine.map = DFMap_Load();
     Engine.car = DFCar_Load();
     DFCamera_SetPos((Vector3) {0, 0, 3});

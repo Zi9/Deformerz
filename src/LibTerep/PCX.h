@@ -22,5 +22,9 @@ typedef struct {
     int height;
 } PCXImage;
 
+extern struct RGBColor PCX_GLOBAL_PALETTE[256];
+
 PCXData* PCX_LoadArray(const char* path);
 PCXImage* PCX_LoadImage(const char* path);
+void PCX_EnableGlobalPalette(const char* path);
+void PCX_DisableGlobalPalette();
