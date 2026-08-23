@@ -32,15 +32,15 @@ static void build_map_model(TerepMap* map)
     for (uint16_t z = 0; z < TEREP_MAPSZ - 1; z++) {
         for (uint16_t x = 0; x < TEREP_MAPSZ - 1; x++) {
             vertices[vertC] = (x - TEREP_MAPSZ / 2.0f) * TMAP_SCALE;
-            vertices[vertC + 1] = map->heightmap[x + z * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
+            vertices[vertC + 1] = map->heightmap->data[x + z * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
             vertices[vertC + 2] = (z - TEREP_MAPSZ / 2.0f) * TMAP_SCALE;
 
             vertices[vertC + 3] = (x - TEREP_MAPSZ / 2.0f) * TMAP_SCALE;
-            vertices[vertC + 4] = map->heightmap[x + (z + 1) * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
+            vertices[vertC + 4] = map->heightmap->data[x + (z + 1) * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
             vertices[vertC + 5] = (z - TEREP_MAPSZ / 2.0f + 1) * TMAP_SCALE;
 
             vertices[vertC + 6] = (x - TEREP_MAPSZ / 2.0f + 1) * TMAP_SCALE;
-            vertices[vertC + 7] = map->heightmap[x + 1 + z * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
+            vertices[vertC + 7] = map->heightmap->data[x + 1 + z * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
             vertices[vertC + 8] = (z - TEREP_MAPSZ / 2.0f) * TMAP_SCALE;
 
             vertices[vertC + 9] = vertices[vertC + 6];
@@ -52,13 +52,13 @@ static void build_map_model(TerepMap* map)
             vertices[vertC + 14] = vertices[vertC + 5];
 
             vertices[vertC + 15] = (x - TEREP_MAPSZ / 2.0f + 1) * TMAP_SCALE;
-            vertices[vertC + 16] = map->heightmap[x + 1 + (z + 1) * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
+            vertices[vertC + 16] = map->heightmap->data[x + 1 + (z + 1) * TEREP_MAPSZ] * TMAP_HEIGHT_SCALE;
             vertices[vertC + 17] = (z - TEREP_MAPSZ / 2.0f + 1) * TMAP_SCALE;
 
             vertC += 18;
 
-            uvy = (float)floor(map->colormap[x + z * TEREP_TEXSZ] / 16.0f) * TMAP_UVMULT;
-            uvx = map->colormap[x + z * TEREP_TEXSZ] * TMAP_UVMULT;
+            uvy = (float)floor(map->colormap->data[x + z * TEREP_TEXSZ] / 16.0f) * TMAP_UVMULT;
+            uvx = map->colormap->data[x + z * TEREP_TEXSZ] * TMAP_UVMULT;
 
             uvs[uvC] = uvx;
             uvs[uvC + 1] = uvy;
@@ -86,20 +86,11 @@ static void build_map_model(TerepMap* map)
     map->uvs = uvs;
 }
 
-static void set_sky_color_hook(PCXData* pcx)
-{
-    for (size_t i = 0; i < 256; i++) {
-        currentMap->palette[i] = pcx->palette[i];
-    }
-}
-
 TerepMap* TerepMap_Load(const char* colpcx, const char* mappcx, const char* maptexpcx)
 {
     TerepMap* map = malloc(sizeof *map);
     currentMap = map;
-    PCX_postprocess_callback = &set_sky_color_hook;
     map->colormap = PCX_LoadArray(colpcx);
-    PCX_postprocess_callback = NULL;
     map->heightmap = PCX_LoadArray(mappcx);
     map->texturemap = PCX_LoadImage(maptexpcx);
 
@@ -108,8 +99,11 @@ TerepMap* TerepMap_Load(const char* colpcx, const char* mappcx, const char* mapt
 }
 void TerepMap_Unload(TerepMap* map)
 {
+    free(map->colormap->data);
+    free(map->heightmap->data);
+    free(map->texturemap->data);
     free(map->colormap);
     free(map->heightmap);
-    free(map->texturemap->data);
+    free(map->texturemap);
     free(map);
 }

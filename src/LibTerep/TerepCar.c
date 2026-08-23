@@ -108,7 +108,7 @@ static void parse_chunk3_4coloredpolygon(TerepCar* car, TerepDat* dat)
         car->polygons[car->polygonCount].vertices[i] = GetU16(dat->cur, 2 * i) / 2;
     }
     car->polygons[car->polygonCount].colors[0] = GetU8(dat->cur, 2 * count + 2);
-    car->polygons[car->polygonCount].colors[1] = GetU8(dat->cur, 2 * count + 3);
+    car->polygons[car->polygonCount].colors[1] = GetU8(dat->cur, 2 * count + 3); // NOTE: This is used for dithering
     car->polygonCount++;
     dat->cur += count * 2 + 4;
 }

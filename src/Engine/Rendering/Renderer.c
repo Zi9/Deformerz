@@ -6,20 +6,23 @@
 #include "Engine/UI/ImGUI.h"
 #include <raylib.h>
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define R2DW 640
-#define R2DH 480
-#define BARH 17
+#define RENDER_W 320
+#define RENDER_H 200
+#define RENDER_SCL 2
+
+RenderTexture2D rendertex;
 
 void Renderer_Initialize()
 {
-    InitWindow(1920, 1080, GAME_WINDOW_TITLE);
+    // InitWindow(1920, 1080, GAME_WINDOW_TITLE);
+    InitWindow(RENDER_W * RENDER_SCL, RENDER_H * RENDER_SCL, GAME_WINDOW_TITLE);
+    rendertex = LoadRenderTexture(RENDER_W, RENDER_H);
     SetTargetFPS(60);
     rlImGuiSetup(true);
-    Engine.skyColor = (Color){40, 40, 40, 255};
 }
 void Renderer_Destroy()
 {
+    UnloadRenderTexture(rendertex);
     rlImGuiShutdown();
     CloseWindow();
 }
@@ -27,12 +30,17 @@ void Renderer_Destroy()
 void Renderer_Render()
 {
     BeginDrawing();
+    BeginTextureMode(rendertex);
     ClearBackground(Engine.skyColor);
     DFCamera_BeginRender();
+    Renderer_RenderMap(Engine.map);
     Renderer_RenderCar(Engine.car);
     DFCamera_EndRender();
+    EndTextureMode();
+    DrawTexturePro(rendertex.texture, (Rectangle){0, 0, rendertex.texture.width, -rendertex.texture.height},
+                   (Rectangle){0, 0, RENDER_W * RENDER_SCL, RENDER_H * RENDER_SCL}, (Vector2){0, 0}, 0, WHITE);
     rlImGuiBegin();
-    Debug_RenderCarDebugger(Engine.car);
+    // Debug_RenderCarDebugger(Engine.car);
     rlImGuiEnd();
     int height = GetScreenHeight();
     DrawText(WMARK, 0, height - 18, 20, BLACK);

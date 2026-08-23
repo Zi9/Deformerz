@@ -31,8 +31,6 @@ struct __attribute__((__packed__)) PCXHeader {
     uint16_t paletteInfo;
 };
 
-void (*PCX_postprocess_callback)(PCXData*) = NULL;
-
 static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
 {
     PCXData* pcx = malloc(sizeof(PCXData));
@@ -76,25 +74,20 @@ static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t ta
     }
     free(hdr);
 
-    // *Resizing routine if requested
-    if (targ_width != width && targ_height != height) {
-        pcx->indices = malloc(targ_width * targ_height * sizeof *pcx->indices);
-        if (height >= targ_height) {
-            for (size_t y = 0; y < targ_height; y++) {
-                memcpy(pcx->indices + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
-            }
-        } else {
-            size_t wrote_pixels = 0;
-            for (size_t y = 0; y < height; y++) {
-                memcpy(pcx->indices + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
-                wrote_pixels += targ_width * sizeof(uint8_t);
-            }
-            memset(pcx->indices + wrote_pixels, 0xFF, (targ_width * targ_height * sizeof(uint8_t)) - wrote_pixels);
+    pcx->data = malloc(targ_width * targ_height * sizeof *pcx->data);
+    if (height >= targ_height) {
+        for (size_t y = 0; y < targ_height; y++) {
+            memcpy(pcx->data + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
         }
-        free(buf);
     } else {
-        pcx->indices = buf;
+        size_t wrote_pixels = 0;
+        for (size_t y = 0; y < height; y++) {
+            memcpy(pcx->data + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
+            wrote_pixels += targ_width * sizeof(uint8_t);
+        }
+        memset(pcx->data + wrote_pixels, 0xFF, (targ_width * targ_height * sizeof(uint8_t)) - wrote_pixels);
     }
+    free(buf);
 
     uint8_t palmagic;
     fread(&palmagic, sizeof(palmagic), 1, fp);
@@ -103,31 +96,22 @@ static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t ta
 
     fclose(fp);
 
-    if (PCX_postprocess_callback != NULL) {
-        PCX_postprocess_callback(pcx);
-    }
-
     return pcx;
 }
 
-uint8_t* PCX_LoadArray(const char* path)
-{
-    PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
-    uint8_t* array = pcx->indices;
-    free(pcx);
-    return array;
-}
+PCXData* PCX_LoadArray(const char* path) { return pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE); }
 PCXImage* PCX_LoadImage(const char* path)
 {
     PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
 
     PCXImage* img = malloc(sizeof(PCXImage));
+    memcpy(img->palette, pcx->palette, PCX_PALETTE_SIZE);
     struct RGBAColor* pix = malloc(PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE * sizeof *pix);
     for (size_t i = 0; i < PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE; i++) {
-        pix[i].red = pcx->palette[pcx->indices[i]].red;
-        pix[i].green = pcx->palette[pcx->indices[i]].green;
-        pix[i].blue = pcx->palette[pcx->indices[i]].blue;
-        if (pcx->indices[i] == 255) {
+        pix[i].red = pcx->palette[pcx->data[i]].red;
+        pix[i].green = pcx->palette[pcx->data[i]].green;
+        pix[i].blue = pcx->palette[pcx->data[i]].blue;
+        if (pcx->data[i] == 255) {
             pix[i].alpha = 0;
         } else {
             pix[i].alpha = 255;
@@ -136,9 +120,7 @@ PCXImage* PCX_LoadImage(const char* path)
     img->data = pix;
     img->width = PCX_DEFAULT_SIZE;
     img->height = PCX_DEFAULT_SIZE;
-    img->format = 7;
-    img->mipmaps = 1;
-    free(pcx->indices);
+    free(pcx->data);
     free(pcx);
     return img;
 }

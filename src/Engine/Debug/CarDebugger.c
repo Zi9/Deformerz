@@ -1,4 +1,5 @@
 #include "Engine/Core/DFCar.h"
+#include "Engine/Rendering/Renderer.h"
 #include "Engine/UI/ImGUI.h"
 #include "cimgui.h"
 #include "raylib.h"
@@ -129,14 +130,4 @@ void Debug_RenderCarDebugger(DFCar* dfcar)
         igTreePop();
     }
     igEnd();
-
-    DrawTexture(dfcar->carTex, 0, 0, WHITE);
-    for (size_t i = 0; i < car->polygonCount; i++) {
-        TerepCarPolygon p = car->polygons[i];
-        if (p.type != TEREP_POLYGON_TEXTURE)
-            continue;
-        for (size_t j = 0; j < p.pointCount; j++) {
-            DrawPixel(p.uv[j].x/65535.0*256.0, p.uv[j].y/65535.0*256.0, GREEN);
-        }
-    }
 }

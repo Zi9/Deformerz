@@ -11,8 +11,8 @@ void Engine_Initialize()
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     Renderer_Initialize();
     SetTargetFPS(60);
+    Engine.map = DFMap_Load();
     Engine.car = DFCar_Load();
-    //Engine.map = TerepMap_Load("data/col.pcx", "data/map.pcx", "data/maptex.pcx");
     DFCamera_SetPos((Vector3) {0, 0, 3});
 }
 
@@ -28,6 +28,7 @@ void Engine_Destroy()
 {
     Renderer_Destroy();
     DFCar_Unload(Engine.car);
+    DFMap_Unload(Engine.map);
     //TerepMap_Unload(Engine.map);
 }
 

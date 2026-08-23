@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <rlgl.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 static inline Vector3 ToVector3(float v[3]) { return (Vector3){v[0], v[1], v[2]}; }
@@ -112,8 +113,8 @@ static void RenderPolygonColored(TerepCarPolygon* face, TerepCarPoint* points)
 static void RenderPolygonTextured(TerepCarPolygon* face, TerepCarPoint* points, Texture tex)
 {
     Color color = WHITE;
-    rlSetTexture(tex.id);
     rlBegin(RL_TRIANGLES);
+    rlSetTexture(tex.id);
     rlColor4ub(color.r, color.g, color.b, color.a);
 
     switch (face->pointCount) {
@@ -182,7 +183,7 @@ static void RenderPolygonTextured(TerepCarPolygon* face, TerepCarPoint* points, 
         break;
     }
     rlEnd();
-    rlSetTexture(0);
+    rlSetTexture(rlGetTextureIdDefault());
 }
 
 void Renderer_RenderCar(DFCar* dfcar)

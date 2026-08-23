@@ -5,4 +5,10 @@
 
 typedef struct {
     TerepMap* map;
+    Texture tex;
+    Model model;
+    Shader shader;
 } DFMap;
+
+DFMap* DFMap_Load();
+void DFMap_Unload(DFMap* dfmap);
