@@ -13,7 +13,7 @@
 
 #ifdef WIN32
 struct PCXHeader {
-#elif //WIN32
+#else
 struct __attribute__((__packed__)) PCXHeader {
 #endif
     uint8_t identifier;

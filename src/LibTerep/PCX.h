@@ -4,7 +4,7 @@
 
 #ifdef WIN32
 struct RGBColor {
-#elif // WIN32
+#else
 struct __attribute__((__packed__)) RGBColor {
 #endif
 
@@ -13,7 +13,7 @@ struct __attribute__((__packed__)) RGBColor {
 
 #ifdef WIN32
 struct RGBAColor {
-#elif // WIN32
+#else
 struct __attribute__((__packed__)) RGBAColor {
 #endif
     uint8_t red, green, blue, alpha;
