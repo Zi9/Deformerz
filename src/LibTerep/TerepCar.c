@@ -27,11 +27,7 @@ static TerepDat* load_dat(const char* path)
 {
     TerepDat* dat = calloc(1, sizeof(TerepDat));
     assert(dat);
-#ifdef WIN32
     FILE* f = fopen(path, "rb");
-#else
-    FILE* f = fopen(path, "r");
-#endif
     strncpy(dat->name, path, 32);
     assert(fseek(f, 0, SEEK_END) == 0);
     dat->size = ftell(f);

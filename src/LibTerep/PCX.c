@@ -44,11 +44,7 @@ static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t ta
 {
     PCXData* pcx = calloc(1, sizeof(PCXData));
     assert(pcx);
-#ifdef WIN32
     FILE* fp = fopen(path, "rb");
-#else
-    FILE* fp = fopen(path, "r");
-#endif
     if (fp == NULL) {
         printf("Unable to open PCX image %s for reading\n", path);
         return NULL;
@@ -157,11 +153,7 @@ PCXImage* PCX_LoadImage(const char* path)
 
 void PCX_EnableGlobalPalette(const char* path)
 {
-#ifdef WIN32
     FILE* fp = fopen(path, "rb");
-#else
-    FILE* fp = fopen(path, "r");
-#endif
     assert(fp);
     // Something funky here but it works so...
     assert(fseek(fp, 0, SEEK_END) == 0);
