@@ -2,11 +2,20 @@
 
 #include <stdint.h>
 
+#ifdef WIN32
+struct RGBColor {
+#elif // WIN32
 struct __attribute__((__packed__)) RGBColor {
+#endif
+
     uint8_t red, green, blue;
 };
 
+#ifdef WIN32
+struct RGBAColor {
+#elif // WIN32
 struct __attribute__((__packed__)) RGBAColor {
+#endif
     uint8_t red, green, blue, alpha;
 };
 

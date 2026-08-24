@@ -1,5 +1,6 @@
 import sys
 import glob
+import os
 
 SHADERS_FOLDER = sys.argv[1]
 SHADERS_OUTPUT = sys.argv[2]
@@ -9,7 +10,11 @@ outfile = open(f"{SHADERS_OUTPUT}/Shaders.h", "w")
 shaders = []
 
 for shdrfile in glob.glob(f"{SHADERS_FOLDER}/*"):
-    fname = shdrfile.split("/")[-1]
+    if os.name == 'nt':
+        fname = shdrfile.split("\\")[-1]
+    else:
+        fname = shdrfile.split("/")[-1]
+
     shadername, shadertype = fname.split(".")
     shf = open(shdrfile, "r")
     shader = {}
