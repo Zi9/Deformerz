@@ -1,11 +1,14 @@
 #include "DFMap.h"
 #include "Engine/Rendering/Shaders.h"
 #include "Engine/Engine.h"
+
+#include <assert.h>
 #include <stdlib.h>
 
 DFMap* DFMap_Load()
 {
-    DFMap* dfmap = malloc(sizeof(DFMap));
+    DFMap* dfmap = calloc(1, sizeof(DFMap));
+    assert(dfmap);
     dfmap->map = TerepMap_Load("./data/col.pcx", "./data/map.pcx", "./data/maptex.pcx");
     for (size_t i = 0; i < 256; i++)
     {

@@ -1,5 +1,6 @@
 #include "TerepCar.h"
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -24,14 +25,16 @@ typedef struct {
 
 static TerepDat* load_dat(const char* path)
 {
-    TerepDat* dat = malloc(sizeof(TerepDat));
-    FILE* f = fopen(path, "r");
+    TerepDat* dat = calloc(1, sizeof(TerepDat));
+    assert(dat);
+    FILE* f = fopen(path, "rb");
     strncpy(dat->name, path, 32);
-    fseek(f, 0, SEEK_END);
+    assert(fseek(f, 0, SEEK_END) == 0);
     dat->size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    dat->data = malloc(dat->size);
-    fread(dat->data, dat->size, 1, f);
+    assert(fseek(f, 0, SEEK_SET) == 0);
+    dat->data = calloc(1, dat->size);
+    assert(dat->data);
+    assert(fread(dat->data, dat->size, 1, f) == 1);
     fclose(f);
     return dat;
 }
@@ -200,7 +203,8 @@ static void parse_chunk3(TerepCar* car, TerepDat* dat)
 
 TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
 {
-    TerepCar* car = malloc(sizeof *car);
+    TerepCar* car = calloc(1, sizeof *car);
+    assert(car);
     TerepDat* dat = load_dat(cardat);
     // TODO: Attempt to detect the Terep1 dat format and load that too
 

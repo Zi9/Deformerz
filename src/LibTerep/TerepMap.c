@@ -1,6 +1,7 @@
 #include "TerepMap.h"
 #include "PCX.h"
 
+#include <assert.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -21,8 +22,10 @@ static void build_map_model(TerepMap* map)
     map->triangleCount = (TEREP_MAPSZ - 1) * (TEREP_MAPSZ - 1) * 2;
     map->vertexCount = map->triangleCount * 3;
 
-    float* vertices = malloc((sizeof *vertices) * map->vertexCount * 3);
-    float* uvs = malloc((sizeof *uvs) * map->vertexCount * 2);
+    float* vertices = calloc(1, (sizeof *vertices) * map->vertexCount * 3);
+    assert(vertices);
+    float* uvs = calloc(1, (sizeof *uvs) * map->vertexCount * 2);
+    assert(uvs);
 
     size_t vertC = 0;
     size_t uvC = 0;
@@ -88,7 +91,8 @@ static void build_map_model(TerepMap* map)
 
 TerepMap* TerepMap_Load(const char* colpcx, const char* mappcx, const char* maptexpcx)
 {
-    TerepMap* map = malloc(sizeof *map);
+    TerepMap* map = calloc(1, sizeof *map);
+    assert(map);
     currentMap = map;
     map->colormap = PCX_LoadArray(colpcx);
     map->heightmap = PCX_LoadArray(mappcx);
