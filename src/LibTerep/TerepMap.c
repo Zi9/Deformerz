@@ -19,6 +19,7 @@ static TerepMap* currentMap;
 
 static void build_map_model(TerepMap* map)
 {
+    // TODO: Make sure triangle orientation matches terep2
     map->triangleCount = (TEREP_MAPSZ - 1) * (TEREP_MAPSZ - 1) * 2;
     map->vertexCount = map->triangleCount * 3;
 

@@ -7,14 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SCALE 10000000.0f
+#define SCALE 256.0f
 
-#define GetU8(base, ofs) *(uint8_t*)(base + ofs)
-#define GetU16(base, ofs) *(uint16_t*)(base + ofs)
-#define GetU32(base, ofs) *(uint32_t*)(base + ofs)
-#define GetI8(base, ofs) *(int8_t*)(base + ofs)
-#define GetI16(base, ofs) *(int16_t*)(base + ofs)
-#define GetI32(base, ofs) *(int32_t*)(base + ofs)
+#define U8(base, ofs) *(uint8_t*)(base + ofs)
+#define U16(base, ofs) *(uint16_t*)(base + ofs)
+#define I8(base, ofs) *(int8_t*)(base + ofs)
+#define I16(base, ofs) *(int16_t*)(base + ofs)
 
 typedef struct {
     uint8_t* data;
@@ -38,6 +36,13 @@ static TerepDat* load_dat(const char* path)
     fclose(f);
     return dat;
 }
+static TerepDat* create_dat()
+{
+    TerepDat* dat = calloc(1, sizeof(TerepDat));
+    assert(dat);
+    dat->data = calloc(1, 10000);
+    return dat;
+}
 static void unload_dat(TerepDat* dat)
 {
     free(dat->data);
@@ -46,16 +51,21 @@ static void unload_dat(TerepDat* dat)
 
 static void parse_chunk1(TerepCar* car, TerepDat* dat)
 {
-    dat->cur = dat->data + GetU16(dat->data, 0);
-    car->pointCount = GetU16(dat->cur, 0);
+    dat->cur = dat->data + U16(dat->data, 0);
+    car->pointCount = U16(dat->cur, 0);
+    car->points = calloc(car->pointCount, sizeof(TerepCarPoint));
+    assert(car->points);
     dat->cur += 2;
     for (size_t i = 0; i < car->pointCount; i++) {
-        car->points[i].pos[0] = GetI32(dat->cur, 0) / SCALE;
-        car->points[i].pos[1] = GetI32(dat->cur, 8) / SCALE;
-        car->points[i].pos[2] = GetI32(dat->cur, 4) / SCALE;
-        int32_t size = GetI32(dat->cur, 22);
-        car->points[i].size = size > 0 ? size / SCALE : 0.0f;
-        car->points[i].type = (TerepPointType)GetI16(dat->cur, 26);
+        car->points[i].unknown[0] = I16(dat->cur, 0);
+        car->points[i].pos[0] = I16(dat->cur, 2) / SCALE;
+        car->points[i].unknown[1] = I16(dat->cur, 8);
+        car->points[i].pos[1] = I16(dat->cur, 10) / SCALE;
+        car->points[i].unknown[2] = I16(dat->cur, 4);
+        car->points[i].pos[2] = I16(dat->cur, 6) / SCALE;
+        uint16_t size = I16(dat->cur, 24);
+        car->points[i].size = size > 0 ? size / SCALE : size;
+        car->points[i].type = I16(dat->cur, 26);
         if (car->points[i].type > 2 && car->points[i].type != 65535) {
             printf("LibTerep | ERROR: Failure parsing %s -- Unknown type point: %i\n", dat->name, car->points[i].type);
         }
@@ -66,17 +76,19 @@ static void parse_chunk1(TerepCar* car, TerepDat* dat)
 
 static void parse_chunk2(TerepCar* car, TerepDat* dat)
 {
-    dat->cur = dat->data + GetU16(dat->data, 2);
-    car->physSegmentCount = GetU16(dat->cur, 0);
+    dat->cur = dat->data + U16(dat->data, 2);
+    car->physSegmentCount = U16(dat->cur, 0);
+    car->physSegments = calloc(car->physSegmentCount, sizeof(TerepCarPhysSegment));
+    assert(car->points);
     dat->cur += 2;
     for (size_t i = 0; i < car->physSegmentCount; i++) {
-        car->physSegments[i].pointA = GetU16(dat->cur, 0);
-        car->physSegments[i].pointB = GetU16(dat->cur, 2);
-        car->physSegments[i].other1 = GetU16(dat->cur, 4);
-        car->physSegments[i].other2 = GetU16(dat->cur, 6);
-        car->physSegments[i].type = GetU16(dat->cur, 8);
-        car->physSegments[i].other3 = GetU16(dat->cur, 10);
-        car->physSegments[i].other4 = GetU16(dat->cur, 12);
+        car->physSegments[i].pointA = U16(dat->cur, 0);
+        car->physSegments[i].pointB = U16(dat->cur, 2);
+        car->physSegments[i].other1 = U16(dat->cur, 4);
+        car->physSegments[i].other2 = U16(dat->cur, 6);
+        car->physSegments[i].type = U16(dat->cur, 8);
+        car->physSegments[i].other3 = U16(dat->cur, 10);
+        car->physSegments[i].other4 = U16(dat->cur, 12);
         if (car->physSegments[i].type != 0 && car->physSegments[i].type != 1 && car->physSegments[i].type != 4 &&
             car->physSegments[i].type != 6 && car->physSegments[i].type != 10 && car->physSegments[i].type != 12) {
             printf("LibTerep | ERROR: Failure parsing %s -- Unknown type physics segment: %i\n", dat->name,
@@ -88,117 +100,92 @@ static void parse_chunk2(TerepCar* car, TerepDat* dat)
     printf("LibTerep | INFO: Loaded %d physics segments\n", car->physSegmentCount);
 }
 
-static void parse_chunk3_1camera(TerepCar* car, TerepDat* dat)
-{
-    car->cameraProperties.cameraPointIndex = GetU16(dat->cur, 0) / 2;
-    if (car->points[car->cameraProperties.cameraPointIndex].type != TEREP_POINT_CAMERA) {
-        printf("LibTerep | ERROR: Failure parsing %s -- Chunk3 -> Camera point (id 0x1) index is not a camera point, "
-               "read index %i\n",
-               dat->name, car->cameraProperties.cameraPointIndex);
-    }
-    car->cameraProperties.unknown1 = GetU8(dat->cur, 2);
-    car->cameraProperties.unknown2 = GetU8(dat->cur, 3);
-    dat->cur += 4;
-}
-
-static void parse_chunk3_4coloredpolygon(TerepCar* car, TerepDat* dat)
-{
-    uint8_t count = GetU8(dat->cur, 0);
-    dat->cur++;
-    car->polygons[car->polygonCount].pointCount = count;
-    car->polygons[car->polygonCount].type = TEREP_POLYGON_COLOR;
-    for (size_t i = 0; i < count; i++) {
-        car->polygons[car->polygonCount].vertices[i] = GetU16(dat->cur, 2 * i) / 2;
-    }
-    car->polygons[car->polygonCount].colors[0] = GetU8(dat->cur, 2 * count + 2);
-    car->polygons[car->polygonCount].colors[1] = GetU8(dat->cur, 2 * count + 3); // NOTE: This is used for dithering
-    car->polygonCount++;
-    dat->cur += count * 2 + 4;
-}
-
-static void parse_chunk3_8texturedpolygon(TerepCar* car, TerepDat* dat)
-{
-    uint8_t count = GetU8(dat->cur, 0);
-    dat->cur++;
-    car->polygons[car->polygonCount].pointCount = count;
-    car->polygons[car->polygonCount].type = TEREP_POLYGON_TEXTURE;
-    for (size_t i = 0; i < count; i++) {
-        car->polygons[car->polygonCount].vertices[i] = GetU16(dat->cur, 2 * i * 3) / 2;
-        car->polygons[car->polygonCount].uv[i].x = GetU16(dat->cur, (2 * i * 3) + 2);
-        car->polygons[car->polygonCount].uv[i].y = GetU16(dat->cur, (2 * i * 3) + 4);
-    }
-    car->polygonCount++;
-    dat->cur += (count + 1) * 3 * 2;
-}
-
-static void parse_chunk3_10wheelprops(TerepCar* car, TerepDat* dat)
-{
-    uint16_t idx = GetU16(dat->cur, 0) / 2;
-    if (idx > 3) {
-        printf("LibTerep | ERROR: Failure parsing %s -- Chunk3 -> Wheel defined past index 3\n", dat->name);
-    }
-    car->wheelProperties[idx].wheelPointIndex = idx;
-    car->wheelProperties[idx].unknown1 = GetU16(dat->cur, 2);
-    car->wheelProperties[idx].unknown2 = GetU16(dat->cur, 4);
-    dat->cur += 3 * 2;
-}
-
 static void parse_chunk3(TerepCar* car, TerepDat* dat)
 {
-    dat->cur = dat->data + GetU16(dat->data, 4);
-    int readItemCount = 0;
+    dat->cur = dat->data + U16(dat->data, 4);
+    car->renderDataCount = 0;
     while (dat->cur < dat->data + dat->size) {
-        uint8_t dtype = GetU8(dat->cur, 0);
+        car->renderData = realloc(car->renderData, (car->renderDataCount + 1) * sizeof(TerepCarRenderDataItem));
+        car->renderData[car->renderDataCount].type = U8(dat->cur, 0);
         dat->cur++;
-        switch (dtype) {
-        case 0:
+        switch (car->renderData[car->renderDataCount].type) {
+        case TEREP_RENDERDATA_NULL:
             break;
-        case 1:
-            parse_chunk3_1camera(car, dat);
+        case TEREP_RENDERDATA_CAMERA: {
+            TerepCarCameraData* cam = calloc(1, sizeof(TerepCarCameraData));
+            car->renderData[car->renderDataCount].camera = cam;
+            cam->cameraPointIndex = U16(dat->cur, 0) / 2;
+            if (car->points[cam->cameraPointIndex].type != TEREP_POINT_CAMERA) {
+                printf("LibTerep | ERROR: Failure parsing %s -- Chunk3 -> Camera point (id 0x1) index is not a camera "
+                       "point, "
+                       "read index %i\n",
+                       dat->name, cam->cameraPointIndex);
+            }
+            cam->unknown1 = U8(dat->cur, 2);
+            cam->unknown2 = U8(dat->cur, 3);
+            dat->cur += 4;
             break;
-        case 3:
+        }
+        case TEREP_RENDERDATA_UNK3_POLYGON: {
             // possibly some culling thing, changing these values seems to do render glitches
-            printf("\e[0;32m3:\t");
-            for (size_t i = 0; i < 6; i++) {
-                printf("%d\t", GetU16(dat->cur, i * 2));
+            TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
+            car->renderData[car->renderDataCount].polygon = polygon;
+            polygon->pointCount = 3;
+            polygon->vertices[0] = U16(dat->cur, 0) / 2;
+            polygon->vertices[1] = U16(dat->cur, 2) / 2;
+            polygon->vertices[2] = U16(dat->cur, 4) / 2;
+            polygon->unknown3values[0] = U16(dat->cur, 6);
+            polygon->unknown3values[1] = U16(dat->cur, 8);
+            polygon->unknown3values[2] = U16(dat->cur, 10);
+            dat->cur += 12;
+            break;
+        }
+        case TEREP_RENDERDATA_COLOR_POLYGON: {
+            TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
+            car->renderData[car->renderDataCount].polygon = polygon;
+            polygon->pointCount = U8(dat->cur, 0);
+            dat->cur++;
+            for (size_t i = 0; i < polygon->pointCount; i++) {
+                polygon->vertices[i] = U16(dat->cur, 2 * i) / 2;
             }
-            dat->cur += 6 * 2;
-            printf("\e[0m\n");
+            polygon->closed = U16(dat->cur, 0) == U16(dat->cur, 2 * polygon->pointCount);
+            polygon->colors[0] = U8(dat->cur, 2 * polygon->pointCount + 2);
+            polygon->colors[1] = U8(dat->cur, 2 * polygon->pointCount + 3); // NOTE: Dithering
+            dat->cur += polygon->pointCount * 2 + 4;
             break;
-        case 4:
-            parse_chunk3_4coloredpolygon(car, dat);
-            break;
-        case 8:
-            parse_chunk3_8texturedpolygon(car, dat);
-            break;
-        case 10:
-            parse_chunk3_10wheelprops(car, dat);
-            break;
-        case 69:
-            printf("\e[0;36m69:\t");
-            for (size_t i = 0; i < 19; i++) {
-                // printf("%d\t", data246[i]);
-                printf("%02X ", GetU8(dat->cur, i));
+        }
+        case TEREP_RENDERDATA_TEXTURE_POLYGON: {
+            TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
+            car->renderData[car->renderDataCount].polygon = polygon;
+            polygon->pointCount = U8(dat->cur, 0);
+            dat->cur++;
+            for (size_t i = 0; i < polygon->pointCount; i++) {
+                polygon->vertices[i] = U16(dat->cur, 2 * i * 3) / 2;
+                polygon->uv[i].x = U16(dat->cur, (2 * i * 3) + 2);
+                polygon->uv[i].y = U16(dat->cur, (2 * i * 3) + 4);
             }
-            dat->cur += 19;
-            printf("\e[0m\n");
+            polygon->closed = U16(dat->cur, 0) == U16(dat->cur, 2 * 3 * polygon->pointCount);
+            dat->cur += (polygon->pointCount + 1) * 3 * 2;
             break;
-        case 246:
-            printf("\e[0;37m246:\t");
-            for (size_t i = 0; i < 19; i++) {
-                // printf("%d\t", data246[i]);
-                printf("%02X ", GetU8(dat->cur, i));
-            }
-            dat->cur += 19;
-            printf("\e[0m\n");
+        }
+        case TEREP_RENDERDATA_WHEEL: {
+            TerepCarWheelData* wheel = calloc(1, sizeof(TerepCarWheelData));
+            car->renderData[car->renderDataCount].wheel = wheel;
+            wheel->wheelPointIndex = U16(dat->cur, 0) / 2;
+            wheel->unknown1 = U16(dat->cur, 2);
+            wheel->unknown2 = U16(dat->cur, 4);
+            memcpy(wheel->unknown3, dat->cur + 6, 20 * 9);
+            dat->cur += (3 * 2) + (20 * 9);
             break;
+        }
         default:
-            printf("LibTerep | ERROR: Failure parsing %s -- Chunk3 -> Unknwon data block %d\n", dat->name, dtype);
+            printf("LibTerep | ERROR: Failure parsing %s -- Chunk3 -> Unknown data block %d\n", dat->name,
+                   car->renderData[car->renderDataCount].type);
             return;
         }
-        readItemCount++;
+        car->renderDataCount++;
     }
-    printf("LibTerep | INFO: Read %i items from chunk3\n", readItemCount);
+    printf("LibTerep | INFO: Read %i items from chunk3\n", car->renderDataCount);
 }
 
 TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
@@ -208,8 +195,8 @@ TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
     TerepDat* dat = load_dat(cardat);
     // TODO: Attempt to detect the Terep1 dat format and load that too
 
-    car->unknownHeaderValue1 = GetU16(dat->data, 6);
-    car->unknownHeaderValue2 = GetU16(dat->data, 8);
+    car->unknownHeaderValue1 = U16(dat->data, 6);
+    car->unknownHeaderValue2 = U16(dat->data, 8);
 
     parse_chunk1(car, dat);
     parse_chunk2(car, dat);
@@ -224,19 +211,181 @@ TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
 }
 void TerepCar_Unload(TerepCar* car)
 {
+    for (int i = 0; i < car->renderDataCount; i++) {
+        switch (car->renderData[i].type) {
+        case TEREP_RENDERDATA_NULL:
+            break;
+        case TEREP_RENDERDATA_CAMERA:
+            free(car->renderData[i].camera);
+            break;
+        case TEREP_RENDERDATA_UNK3_POLYGON:
+        case TEREP_RENDERDATA_COLOR_POLYGON:
+        case TEREP_RENDERDATA_TEXTURE_POLYGON:
+            free(car->renderData[i].polygon);
+            break;
+        case TEREP_RENDERDATA_WHEEL:
+            free(car->renderData[i].wheel);
+            break;
+        }
+    }
+    free(car->renderData);
+    free(car->points);
+    free(car->physSegments);
     free(car->carTexture->data);
     free(car->carTexture);
     free(car);
+}
+void write_chunk1(TerepCar* car, TerepDat* dat)
+{
+    I16(dat->data, 0) = dat->cur - dat->data;
+    U16(dat->cur, 0) = car->pointCount;
+    dat->cur += 2;
+    for (size_t i = 0; i < car->pointCount; i++) {
+        I16(dat->cur, 0) = car->points[i].unknown[0];
+        I16(dat->cur, 2) = car->points[i].pos[0] * SCALE;
+        I16(dat->cur, 8) = car->points[i].unknown[1];
+        I16(dat->cur, 10) = car->points[i].pos[1] * SCALE;
+        I16(dat->cur, 4) = car->points[i].unknown[2];
+        I16(dat->cur, 6) = car->points[i].pos[2] * SCALE;
+        I16(dat->cur, 24) = car->points[i].size * SCALE;
+        I16(dat->cur, 26) = car->points[i].type;
+        dat->cur += 28;
+    }
+    printf("LibTerep | INFO: Wrote %d points to file %s\n", car->pointCount, dat->name);
+}
+void write_chunk2(TerepCar* car, TerepDat* dat)
+{
+    I16(dat->data, 2) = dat->cur - dat->data;
+    U16(dat->cur, 0) = car->physSegmentCount;
+    dat->cur += 2;
+    for (size_t i = 0; i < car->physSegmentCount; i++) {
+        U16(dat->cur, 0) = car->physSegments[i].pointA;
+        U16(dat->cur, 2) = car->physSegments[i].pointB;
+        U16(dat->cur, 4) = car->physSegments[i].other1;
+        U16(dat->cur, 6) = car->physSegments[i].other2;
+        U16(dat->cur, 8) = car->physSegments[i].type;
+        U16(dat->cur, 10) = car->physSegments[i].other3;
+        U16(dat->cur, 12) = car->physSegments[i].other4;
+        dat->cur += 14;
+    }
+    printf("LibTerep | INFO: Wrote %d physics segments %s\n", car->physSegmentCount, dat->name);
+}
+
+void write_chunk3(TerepCar* car, TerepDat* dat)
+{
+    I16(dat->data, 4) = dat->cur - dat->data;
+    for (int i = 0; i < car->renderDataCount; i++) {
+        U8(dat->cur, 0) = car->renderData[i].type;
+        dat->cur++;
+        switch (car->renderData[i].type) {
+        case TEREP_RENDERDATA_NULL:
+            break;
+        case TEREP_RENDERDATA_CAMERA: {
+            TerepCarCameraData* cam = car->renderData[i].camera;
+            U16(dat->cur, 0) = cam->cameraPointIndex * 2;
+            U8(dat->cur, 2) = cam->unknown1;
+            U8(dat->cur, 3) = cam->unknown2;
+            dat->cur += 4;
+            break;
+        }
+        case TEREP_RENDERDATA_UNK3_POLYGON: {
+            // possibly some culling thing, changing these values seems to do render glitches
+            TerepCarPolygonData* polygon = car->renderData[i].polygon;
+            U16(dat->cur, 0) = polygon->vertices[0] * 2;
+            U16(dat->cur, 2) = polygon->vertices[1] * 2;
+            U16(dat->cur, 4) = polygon->vertices[2] * 2;
+            U16(dat->cur, 6) = polygon->unknown3values[0];
+            U16(dat->cur, 8) = polygon->unknown3values[1];
+            U16(dat->cur, 10) = polygon->unknown3values[2];
+            dat->cur += 12;
+            break;
+        }
+        case TEREP_RENDERDATA_COLOR_POLYGON: {
+            TerepCarPolygonData* polygon = car->renderData[i].polygon;
+            U8(dat->cur, 0) = polygon->pointCount;
+            dat->cur++;
+            for (size_t i = 0; i < polygon->pointCount; i++) {
+                if (!polygon->closed) {
+                    U16(dat->cur, 0) = polygon->vertices[i] * 2 + 1;
+                } else {
+                    U16(dat->cur, 0) = polygon->vertices[i] * 2;
+                }
+                dat->cur += 2;
+            }
+            if (polygon->closed) {
+                U16(dat->cur, 0) = polygon->vertices[0] * 2;
+            } else {
+
+                U16(dat->cur, 0) = 0;
+            }
+            dat->cur += 2;
+            U8(dat->cur, 0) = polygon->colors[0];
+            U8(dat->cur, 1) = polygon->colors[1]; // NOTE: Dithering
+            dat->cur += 2;
+            break;
+        }
+        case TEREP_RENDERDATA_TEXTURE_POLYGON: {
+            TerepCarPolygonData* polygon = car->renderData[i].polygon;
+            U8(dat->cur, 0) = polygon->pointCount;
+            dat->cur++;
+            for (size_t i = 0; i < polygon->pointCount; i++) {
+                U16(dat->cur, 0) = polygon->vertices[i] * 2;
+                U16(dat->cur, 2) = polygon->uv[i].x;
+                U16(dat->cur, 4) = polygon->uv[i].y;
+                dat->cur += 3 * 2;
+            }
+            if (polygon->closed) {
+                U16(dat->cur, 0) = polygon->vertices[0] * 2;
+                U16(dat->cur, 2) = polygon->uv[0].x;
+                U16(dat->cur, 4) = polygon->uv[0].y;
+            } else {
+                U16(dat->cur, 0) = 0;
+                U16(dat->cur, 2) = 0;
+                U16(dat->cur, 4) = 0;
+            }
+            dat->cur += 3 * 2;
+            break;
+        }
+        case TEREP_RENDERDATA_WHEEL: {
+            TerepCarWheelData* wheel = car->renderData[i].wheel;
+            U16(dat->cur, 0) = wheel->wheelPointIndex * 2;
+            U16(dat->cur, 2) = wheel->unknown1;
+            U16(dat->cur, 4) = wheel->unknown2;
+            memcpy(dat->cur + 6, wheel->unknown3, 20 * 9);
+            dat->cur += (3 * 2) + (20 * 9);
+            break;
+        }
+        }
+    }
+    printf("LibTerep | INFO: Wrote %i items to %s\n", car->renderDataCount, dat->name);
+}
+void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx)
+{
+    TerepDat* dat = create_dat();
+    strncpy(dat->name, cardat, 32);
+
+    dat->cur = dat->data + 132;
+    write_chunk1(car, dat);
+    write_chunk2(car, dat);
+    write_chunk3(car, dat);
+    U16(dat->data, 6) = car->unknownHeaderValue1;
+    U16(dat->data, 8) = car->unknownHeaderValue2;
+    dat->size = dat->cur - dat->data;
+
+    FILE* fp = fopen(cardat, "wb");
+    fwrite(dat->data, dat->size, 1, fp);
+    fclose(fp);
+    unload_dat(dat);
 }
 
 /*
 static void load_dat_chunk2_terep1(TerepCar* car, uint8_t* chunkStart)
 {
-    car->physSegmentCount = GetU16(chunkStart, 0);
+    car->physSegmentCount = U16(chunkStart, 0);
     uint8_t* p = chunkStart + 2;
     for (size_t i = 0; i < car->physSegmentCount; i++) {
-        car->physSegments[i].pointA = GetU16(p, 0);
-        car->physSegments[i].pointB = GetU16(p, 2);
+        car->physSegments[i].pointA = U16(p, 0);
+        car->physSegments[i].pointB = U16(p, 2);
         car->physSegments[i].type = TEREP_SEGMENT_NORMAL;
         if (car->physSegments[i].type != 0 && car->physSegments[i].type != 1 && car->physSegments[i].type != 4 &&
             car->physSegments[i].type != 6 && car->physSegments[i].type != 10 && car->physSegments[i].type != 12) {
