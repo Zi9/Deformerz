@@ -164,3 +164,4 @@ void DFCamera_Update()
         RecalculateCamera();
     }
 }
+Camera DFCamera_GetRLCamera() { return CAM.rlCam; }

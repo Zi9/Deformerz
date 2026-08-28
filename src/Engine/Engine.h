@@ -7,7 +7,6 @@
 #define GAME_WINDOW_TITLE "Deformerz - A recreation of Terep2"
 #define WMARK "Deformerz - v0.1"
 
-
 typedef struct {
     float dt;
     float time;
