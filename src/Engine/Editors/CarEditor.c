@@ -1,3 +1,7 @@
 #include "CarEditor.h"
 
-int SelectedPoint = -1;
+CarEditorState CarEditor = {
+    .Active = false,
+    .SelectedPoint = -1,
+    .HandleMouseIn3D = false
+};

@@ -40,7 +40,7 @@ struct __attribute__((__packed__)) PCXHeader {
 bool USE_GLOBAL_PALETTE_FOR_LOADING = false;
 struct RGBColor PCX_GLOBAL_PALETTE[256] = {0};
 
-static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t targ_height)
+static PCXData* _PCX_LoadFile(const char* path, uint16_t targ_width, uint16_t targ_height)
 {
     PCXData* pcx = calloc(1, sizeof(PCXData));
     assert(pcx);
@@ -111,10 +111,10 @@ static PCXData* pcx_load_file(const char* path, uint16_t targ_width, uint16_t ta
     return pcx;
 }
 
-PCXData* PCX_LoadArray(const char* path) { return pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE); }
+PCXData* PCX_LoadArray(const char* path) { return _PCX_LoadFile(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE); }
 PCXImage* PCX_LoadImage(const char* path)
 {
-    PCXData* pcx = pcx_load_file(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
+    PCXData* pcx = _PCX_LoadFile(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
     PCXImage* img = calloc(1, sizeof(PCXImage));
     assert(img);
     memcpy(img->palette, pcx->palette, PCX_PALETTE_SIZE);

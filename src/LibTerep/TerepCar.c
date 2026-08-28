@@ -6,8 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define SCALE 256.0f
+#define PHYS_LINK_SCALE 16384.0f
 
 #define U8(base, ofs) *(uint8_t*)(base + ofs)
 #define U16(base, ofs) *(uint16_t*)(base + ofs)
@@ -21,7 +23,7 @@ typedef struct {
     uint8_t* cur;
 } TerepDat;
 
-static TerepDat* load_dat(const char* path)
+static TerepDat* _LoadDat(const char* path)
 {
     TerepDat* dat = calloc(1, sizeof(TerepDat));
     assert(dat);
@@ -36,20 +38,20 @@ static TerepDat* load_dat(const char* path)
     fclose(f);
     return dat;
 }
-static TerepDat* create_dat()
+static TerepDat* _CreateDat()
 {
     TerepDat* dat = calloc(1, sizeof(TerepDat));
     assert(dat);
     dat->data = calloc(1, 10000);
     return dat;
 }
-static void unload_dat(TerepDat* dat)
+static void _UnloadDat(TerepDat* dat)
 {
     free(dat->data);
     free(dat);
 }
 
-static void parse_chunk1(TerepCar* car, TerepDat* dat)
+static void _ParseChunk1(TerepCar* car, TerepDat* dat)
 {
     dat->cur = dat->data + U16(dat->data, 0);
     car->pointCount = U16(dat->cur, 0);
@@ -74,7 +76,7 @@ static void parse_chunk1(TerepCar* car, TerepDat* dat)
     printf("LibTerep | INFO: Loaded %d points\n", car->pointCount);
 }
 
-static void parse_chunk2(TerepCar* car, TerepDat* dat)
+static void _ParseChunk2(TerepCar* car, TerepDat* dat)
 {
     dat->cur = dat->data + U16(dat->data, 2);
     car->physSegmentCount = U16(dat->cur, 0);
@@ -84,23 +86,27 @@ static void parse_chunk2(TerepCar* car, TerepDat* dat)
     for (size_t i = 0; i < car->physSegmentCount; i++) {
         car->physSegments[i].pointA = U16(dat->cur, 0);
         car->physSegments[i].pointB = U16(dat->cur, 2);
-        car->physSegments[i].other1 = U16(dat->cur, 4);
-        car->physSegments[i].other2 = U16(dat->cur, 6);
+        car->physSegments[i].len = U16(dat->cur, 4) / PHYS_LINK_SCALE;
+        car->physSegments[i].len2 = U16(dat->cur, 6) / PHYS_LINK_SCALE;
         car->physSegments[i].type = U16(dat->cur, 8);
-        car->physSegments[i].other3 = U16(dat->cur, 10);
-        car->physSegments[i].other4 = U16(dat->cur, 12);
+        car->physSegments[i].len_min = U16(dat->cur, 10) / PHYS_LINK_SCALE;
+        car->physSegments[i].len_max = U16(dat->cur, 12) / PHYS_LINK_SCALE;
         if (car->physSegments[i].type != 0 && car->physSegments[i].type != 1 && car->physSegments[i].type != 4 &&
             car->physSegments[i].type != 6 && car->physSegments[i].type != 10 && car->physSegments[i].type != 12) {
             printf("LibTerep | ERROR: Failure parsing %s -- Unknown type physics segment: %i\n", dat->name,
                    car->physSegments[i].type);
             return;
         }
+        if (car->physSegments[i].len != car->physSegments[i].len2)
+        {
+            printf("XXXX\n");
+        }
         dat->cur += 14;
     }
     printf("LibTerep | INFO: Loaded %d physics segments\n", car->physSegmentCount);
 }
 
-static void parse_chunk3(TerepCar* car, TerepDat* dat)
+static void _ParseChunk3(TerepCar* car, TerepDat* dat)
 {
     dat->cur = dat->data + U16(dat->data, 4);
     car->renderDataCount = 0;
@@ -192,21 +198,21 @@ TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
 {
     TerepCar* car = calloc(1, sizeof *car);
     assert(car);
-    TerepDat* dat = load_dat(cardat);
+    TerepDat* dat = _LoadDat(cardat);
     // TODO: Attempt to detect the Terep1 dat format and load that too
 
     car->unknownHeaderValue1 = U16(dat->data, 6);
     car->unknownHeaderValue2 = U16(dat->data, 8);
 
-    parse_chunk1(car, dat);
-    parse_chunk2(car, dat);
-    parse_chunk3(car, dat);
+    _ParseChunk1(car, dat);
+    _ParseChunk2(car, dat);
+    _ParseChunk3(car, dat);
     printf("LibTerep | INFO: Finished parsing %s (%zu bytes)\n", dat->name, dat->size);
 
     car->carTexture = PCX_LoadImage(carpcx);
     printf("LibTerep | INFO: Loaded car texture %s\n", carpcx);
 
-    unload_dat(dat);
+    _UnloadDat(dat);
     return car;
 }
 void TerepCar_Unload(TerepCar* car)
@@ -235,7 +241,7 @@ void TerepCar_Unload(TerepCar* car)
     free(car->carTexture);
     free(car);
 }
-void write_chunk1(TerepCar* car, TerepDat* dat)
+void _WriteChunk1(TerepCar* car, TerepDat* dat)
 {
     I16(dat->data, 0) = dat->cur - dat->data;
     U16(dat->cur, 0) = car->pointCount;
@@ -253,7 +259,7 @@ void write_chunk1(TerepCar* car, TerepDat* dat)
     }
     printf("LibTerep | INFO: Wrote %d points to file %s\n", car->pointCount, dat->name);
 }
-void write_chunk2(TerepCar* car, TerepDat* dat)
+void _WriteChunk2(TerepCar* car, TerepDat* dat)
 {
     I16(dat->data, 2) = dat->cur - dat->data;
     U16(dat->cur, 0) = car->physSegmentCount;
@@ -261,17 +267,17 @@ void write_chunk2(TerepCar* car, TerepDat* dat)
     for (size_t i = 0; i < car->physSegmentCount; i++) {
         U16(dat->cur, 0) = car->physSegments[i].pointA;
         U16(dat->cur, 2) = car->physSegments[i].pointB;
-        U16(dat->cur, 4) = car->physSegments[i].other1;
-        U16(dat->cur, 6) = car->physSegments[i].other2;
+        U16(dat->cur, 4) = round(car->physSegments[i].len * PHYS_LINK_SCALE);
+        U16(dat->cur, 6) = round(car->physSegments[i].len2 * PHYS_LINK_SCALE);
         U16(dat->cur, 8) = car->physSegments[i].type;
-        U16(dat->cur, 10) = car->physSegments[i].other3;
-        U16(dat->cur, 12) = car->physSegments[i].other4;
+        U16(dat->cur, 10) = round(car->physSegments[i].len_min * PHYS_LINK_SCALE);
+        U16(dat->cur, 12) = round(car->physSegments[i].len_max * PHYS_LINK_SCALE);
         dat->cur += 14;
     }
     printf("LibTerep | INFO: Wrote %d physics segments %s\n", car->physSegmentCount, dat->name);
 }
 
-void write_chunk3(TerepCar* car, TerepDat* dat)
+void _WriteChunk3(TerepCar* car, TerepDat* dat)
 {
     I16(dat->data, 4) = dat->cur - dat->data;
     for (int i = 0; i < car->renderDataCount; i++) {
@@ -361,13 +367,13 @@ void write_chunk3(TerepCar* car, TerepDat* dat)
 }
 void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx)
 {
-    TerepDat* dat = create_dat();
+    TerepDat* dat = _CreateDat();
     strncpy(dat->name, cardat, 32);
 
     dat->cur = dat->data + 132;
-    write_chunk1(car, dat);
-    write_chunk2(car, dat);
-    write_chunk3(car, dat);
+    _WriteChunk1(car, dat);
+    _WriteChunk2(car, dat);
+    _WriteChunk3(car, dat);
     U16(dat->data, 6) = car->unknownHeaderValue1;
     U16(dat->data, 8) = car->unknownHeaderValue2;
     dat->size = dat->cur - dat->data;
@@ -375,7 +381,7 @@ void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx)
     FILE* fp = fopen(cardat, "wb");
     fwrite(dat->data, dat->size, 1, fp);
     fclose(fp);
-    unload_dat(dat);
+    _UnloadDat(dat);
 }
 
 /*

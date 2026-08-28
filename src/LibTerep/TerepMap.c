@@ -17,7 +17,7 @@
 
 static TerepMap* currentMap;
 
-static void build_map_model(TerepMap* map)
+static void _BuildMapModel(TerepMap* map)
 {
     // TODO: Make sure triangle orientation matches terep2
     map->triangleCount = (TEREP_MAPSZ - 1) * (TEREP_MAPSZ - 1) * 2;
@@ -99,7 +99,7 @@ TerepMap* TerepMap_Load(const char* colpcx, const char* mappcx, const char* mapt
     map->heightmap = PCX_LoadArray(mappcx);
     map->texturemap = PCX_LoadImage(maptexpcx);
 
-    build_map_model(map);
+    _BuildMapModel(map);
     return map;
 }
 void TerepMap_Unload(TerepMap* map)

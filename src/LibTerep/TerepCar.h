@@ -30,7 +30,7 @@ typedef struct {
         TEREP_SEGMENT_SUSP_FRONT2 = 12,
     } type;
     uint16_t pointA, pointB;
-    uint16_t other1, other2, other3, other4;
+    float len, len2, len_min, len_max;
 } TerepCarPhysSegment;
 
 // Chunk3

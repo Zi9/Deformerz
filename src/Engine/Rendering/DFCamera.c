@@ -36,7 +36,7 @@ struct DFCamera {
     .rlCam = {
         .position = {0, 0, 0}, .target = {0, 0, -1}, .up = {0, 1, 0}, .fovy = 90, .projection = CAMERA_PERSPECTIVE}};
 
-static void SetFreecam(bool enable)
+static void _SetFreecam(bool enable)
 {
     CAM.freecamEnabled = enable;
     if (enable) {
@@ -47,7 +47,7 @@ static void SetFreecam(bool enable)
     }
 }
 
-static void RecalculateCamera()
+static void _RecalculateCamera()
 {
     CAM.forward.x = cosf(DEG2RAD * CAM.view.x) * cosf(DEG2RAD * CAM.view.y);
     CAM.forward.y = sinf(DEG2RAD * CAM.view.y);
@@ -62,6 +62,7 @@ void DFCamera_BeginRender() { BeginMode3D(CAM.rlCam); }
 void DFCamera_EndRender()
 {
     EndMode3D();
+    return;
     float screenMiddleX = GetScreenWidth() / 2.0;
     float screenMiddleY = GetScreenHeight() / 2.0;
     if (CAM.freecamEnabled) {
@@ -84,18 +85,18 @@ void DFCamera_EndRender()
 void DFCamera_SetPos(Vector3 pos)
 {
     CAM.rlCam.position = pos;
-    RecalculateCamera();
+    _RecalculateCamera();
 }
 void DFCamera_SetRot(Vector2 rot)
 {
     CAM.view = rot;
-    RecalculateCamera();
+    _RecalculateCamera();
 }
 void DFCamera_SetPosRot(Vector3 pos, Vector2 rot)
 {
     CAM.rlCam.position = pos;
     CAM.view = rot;
-    RecalculateCamera();
+    _RecalculateCamera();
 }
 Vector3 DFCamera_GetPos() { return CAM.rlCam.position; }
 Vector2 DFCamera_GetRot() { return CAM.view; }
@@ -108,14 +109,14 @@ void DFCamera_Update()
 
     if (IsKeyPressed(KEY_F3)) {
         if (CAM.freecamEnabled)
-            SetFreecam(false);
+            _SetFreecam(false);
         else
-            SetFreecam(true);
+            _SetFreecam(true);
     }
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
-        SetFreecam(true);
+        _SetFreecam(true);
     if (IsMouseButtonReleased(MOUSE_RIGHT_BUTTON))
-        SetFreecam(false);
+        _SetFreecam(false);
 
     if (CAM.freecamEnabled) {
         float mwheel = GetMouseWheelMove();
@@ -161,7 +162,7 @@ void DFCamera_Update()
             CAM.rlCam.position = Vector3Add(CAM.rlCam.position, Vector3Multiply(CAM.up, v));
         if (IsKeyDown(KEY_Q))
             CAM.rlCam.position = Vector3Subtract(CAM.rlCam.position, Vector3Multiply(CAM.up, v));
-        RecalculateCamera();
+        _RecalculateCamera();
     }
 }
 Camera DFCamera_GetRLCamera() { return CAM.rlCam; }
