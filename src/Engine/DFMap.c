@@ -1,5 +1,5 @@
 #include "DFMap.h"
-#include "Engine/Rendering/Shaders.h"
+#include "Engine/Shaders.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -34,4 +34,8 @@ void DFMap_Unload(DFMap* dfmap)
     UnloadModel(dfmap->model);
     UnloadShader(dfmap->shader);
     free(dfmap);
+}
+void DFMap_Render(DFMap* dfmap)
+{
+    DrawModel(dfmap->model, (Vector3){0.0f, -3.75f, 0.0f}, 1.0f, WHITE); // HACK: This is stinky, fix in the future
 }

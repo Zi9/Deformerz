@@ -26,16 +26,16 @@ endif()
 add_subdirectory(vendor/cimgui)
 
 add_custom_command(
-    OUTPUT src/Engine/Rendering/Shaders.h
-    COMMAND python ../tools/shaderbuild.py ../src/Engine/Rendering/Shaders/ ../src/Engine/Rendering/
-    DEPENDS ./src/Engine/Rendering/Shaders/Affine.fs ./src/Engine/Rendering/Shaders/Affine.vs
+    OUTPUT src/Engine/Shaders.h
+    COMMAND python ../tools/shaderbuild.py ../src/Engine/Shaders/ ../src/Engine/Shaders.h
+    DEPENDS ./src/Engine/Shaders/Affine.fs ./src/Engine/Shaders/Affine.vs
 )
 
 if(WIN32)
-    add_executable(Deformerz ${SRC} ${SRC_RLIMGUI} ${SRC_IMGUI} src/Engine/Rendering/Shaders.h)
+    add_executable(Deformerz ${SRC} ${SRC_RLIMGUI} ${SRC_IMGUI} src/Engine/Shaders.h)
     target_include_directories(Deformerz PUBLIC vendor/cimgui/imgui)
 else()
-    add_executable(Deformerz ${SRC} ${SRC_RLIMGUI} src/Engine/Rendering/Shaders.h)
+    add_executable(Deformerz ${SRC} ${SRC_RLIMGUI} src/Engine/Shaders.h)
 endif()
 
 target_include_directories(Deformerz PUBLIC src)
