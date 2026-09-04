@@ -31,7 +31,7 @@ void Engine_SwitchContext(EngineContext ctx)
     _Next = ctx;
 }
 
-void Engine_Main()
+int main()
 {
     SetTraceLogLevel(LOG_ERROR);
     SetTargetFPS(MAXFPS);

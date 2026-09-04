@@ -12,6 +12,7 @@
 
 #define SCALE 256.0f
 #define PHYS_LINK_SCALE 16384.0f
+#define UV_SCALE 65535.0f
 
 typedef struct {
     uint8_t* data;
@@ -47,10 +48,8 @@ typedef struct {
     enum {
         TEREP_PHYSLINK_SUSP_EXTRA = 0,
         TEREP_PHYSLINK_NORMAL = 1,
-        TEREP_PHYSLINK_SUSP_REAR = 4,
-        TEREP_PHYSLINK_SUSP_REAR2 = 6,
-        TEREP_PHYSLINK_SUSP_FRONT = 10,
-        TEREP_PHYSLINK_SUSP_FRONT2 = 12,
+        TEREP_PHYSLINK_SUSP_REAR = 6,
+        TEREP_PHYSLINK_SUSP_FRONT = 10
     } type;
     TerepCarPoint* pointA;
     TerepCarPoint* pointB;
@@ -72,7 +71,7 @@ typedef struct {
         uint16_t unknown3values[3];
         uint8_t colors[2];
         struct {
-            uint16_t x, y;
+            float x, y;
         } uv[TEREP_MAX_POLYGON_POINTS];
     };
 } TerepCarPolygonData;
@@ -127,5 +126,9 @@ typedef struct {
 TerepCar* TerepCar_Load(const char* cardat, const char* carpcx);
 TerepCar* TerepCar_LoadText(const char* cartext);
 void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx);
-void TerepCar_WriteText(const char* cartext);
+void TerepCar_WriteText(TerepCar* car, const char* cartext);
 void TerepCar_Unload(TerepCar* car);
+
+const char* TerepCar_Point2String(TerepCarPoint* point);
+const char* TerepCar_PhysLink2String(TerepCarPhysLink* seg);
+const char* TerepCar_RenderType2String(TerepCarRenderDataItem* item);

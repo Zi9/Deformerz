@@ -7,20 +7,6 @@
 
 static bool mouse3D = false;
 
-static const char* _Point2Str(TerepCarPoint* point)
-{
-    switch (point->type) {
-    case TEREP_POINT_GEOMETRY:
-        return "GEOMETRY";
-    case TEREP_POINT_CAMERA:
-        return "CAMERA";
-    case TEREP_POINT_WHEEL_FRONT:
-        return "WHEEL_F";
-    case TEREP_POINT_WHEEL_REAR:
-        return "WHEEL_R";
-    }
-}
-
 static void _3D(DFCar* dfcar)
 {
     TerepCar* car = dfcar->car;
@@ -71,7 +57,7 @@ static void _UI(DFCar* dfcar)
     igSeparator();
     igPushID_Str("Points");
     for (size_t i = 0; i < car->pointCount; i++) {
-        igText("%i - %s (%f, %f, %f) S:%f", i, _Point2Str(&car->points[i]), car->points[i].pos[0],
+        igText("%i - %s (%f, %f, %f) S:%f", i, TerepCar_Point2String(&car->points[i]), car->points[i].pos[0],
                car->points[i].pos[1], car->points[i].pos[2], car->points[i].size);
     }
     igPopID();

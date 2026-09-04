@@ -77,48 +77,48 @@ void DFCar_RenderPolygonTextured(TerepCarPolygonData* face, Texture tex, Color t
 
     switch (face->vertexCount) {
     case 3:
-        rlTexCoord2f(face->uv[2].x / 65535.0, face->uv[2].y / 65535.0);
+        rlTexCoord2f(face->uv[2].x, face->uv[2].y);
         rlVertex3f(face->vertices[2]->pos[0], face->vertices[2]->pos[1], face->vertices[2]->pos[2]);
-        rlTexCoord2f(face->uv[1].x / 65535.0, face->uv[1].y / 65535.0);
+        rlTexCoord2f(face->uv[1].x, face->uv[1].y);
         rlVertex3f(face->vertices[1]->pos[0], face->vertices[1]->pos[1], face->vertices[1]->pos[2]);
-        rlTexCoord2f(face->uv[0].x / 65535.0, face->uv[0].y / 65535.0);
+        rlTexCoord2f(face->uv[0].x, face->uv[0].y);
         rlVertex3f(face->vertices[0]->pos[0], face->vertices[0]->pos[1], face->vertices[0]->pos[2]);
         break;
     case 4:
-        rlTexCoord2f(face->uv[2].x / 65535.0, face->uv[2].y / 65535.0);
+        rlTexCoord2f(face->uv[2].x, face->uv[2].y);
         rlVertex3f(face->vertices[2]->pos[0], face->vertices[2]->pos[1], face->vertices[2]->pos[2]);
-        rlTexCoord2f(face->uv[1].x / 65535.0, face->uv[1].y / 65535.0);
+        rlTexCoord2f(face->uv[1].x, face->uv[1].y);
         rlVertex3f(face->vertices[1]->pos[0], face->vertices[1]->pos[1], face->vertices[1]->pos[2]);
-        rlTexCoord2f(face->uv[0].x / 65535.0, face->uv[0].y / 65535.0);
+        rlTexCoord2f(face->uv[0].x, face->uv[0].y);
         rlVertex3f(face->vertices[0]->pos[0], face->vertices[0]->pos[1], face->vertices[0]->pos[2]);
 
-        rlTexCoord2f(face->uv[0].x / 65535.0, face->uv[0].y / 65535.0);
+        rlTexCoord2f(face->uv[0].x, face->uv[0].y);
         rlVertex3f(face->vertices[0]->pos[0], face->vertices[0]->pos[1], face->vertices[0]->pos[2]);
-        rlTexCoord2f(face->uv[3].x / 65535.0, face->uv[3].y / 65535.0);
+        rlTexCoord2f(face->uv[3].x, face->uv[3].y);
         rlVertex3f(face->vertices[3]->pos[0], face->vertices[3]->pos[1], face->vertices[3]->pos[2]);
-        rlTexCoord2f(face->uv[2].x / 65535.0, face->uv[2].y / 65535.0);
+        rlTexCoord2f(face->uv[2].x, face->uv[2].y);
         rlVertex3f(face->vertices[2]->pos[0], face->vertices[2]->pos[1], face->vertices[2]->pos[2]);
         break;
     case 5:
-        rlTexCoord2f(face->uv[2].x / 65535.0, face->uv[2].y / 65535.0);
+        rlTexCoord2f(face->uv[2].x, face->uv[2].y);
         rlVertex3f(face->vertices[2]->pos[0], face->vertices[2]->pos[1], face->vertices[2]->pos[2]);
-        rlTexCoord2f(face->uv[1].x / 65535.0, face->uv[1].y / 65535.0);
+        rlTexCoord2f(face->uv[1].x, face->uv[1].y);
         rlVertex3f(face->vertices[1]->pos[0], face->vertices[1]->pos[1], face->vertices[1]->pos[2]);
-        rlTexCoord2f(face->uv[0].x / 65535.0, face->uv[0].y / 65535.0);
+        rlTexCoord2f(face->uv[0].x, face->uv[0].y);
         rlVertex3f(face->vertices[0]->pos[0], face->vertices[0]->pos[1], face->vertices[0]->pos[2]);
 
-        rlTexCoord2f(face->uv[0].x / 65535.0, face->uv[0].y / 65535.0);
+        rlTexCoord2f(face->uv[0].x, face->uv[0].y);
         rlVertex3f(face->vertices[0]->pos[0], face->vertices[0]->pos[1], face->vertices[0]->pos[2]);
-        rlTexCoord2f(face->uv[4].x / 65535.0, face->uv[4].y / 65535.0);
+        rlTexCoord2f(face->uv[4].x, face->uv[4].y);
         rlVertex3f(face->vertices[4]->pos[0], face->vertices[4]->pos[1], face->vertices[4]->pos[2]);
-        rlTexCoord2f(face->uv[2].x / 65535.0, face->uv[2].y / 65535.0);
+        rlTexCoord2f(face->uv[2].x, face->uv[2].y);
         rlVertex3f(face->vertices[2]->pos[0], face->vertices[2]->pos[1], face->vertices[2]->pos[2]);
 
-        rlTexCoord2f(face->uv[4].x / 65535.0, face->uv[4].y / 65535.0);
+        rlTexCoord2f(face->uv[4].x, face->uv[4].y);
         rlVertex3f(face->vertices[4]->pos[0], face->vertices[4]->pos[1], face->vertices[4]->pos[2]);
-        rlTexCoord2f(face->uv[3].x / 65535.0, face->uv[3].y / 65535.0);
+        rlTexCoord2f(face->uv[3].x, face->uv[3].y);
         rlVertex3f(face->vertices[3]->pos[0], face->vertices[3]->pos[1], face->vertices[3]->pos[2]);
-        rlTexCoord2f(face->uv[2].x / 65535.0, face->uv[2].y / 65535.0);
+        rlTexCoord2f(face->uv[2].x, face->uv[2].y);
         rlVertex3f(face->vertices[2]->pos[0], face->vertices[2]->pos[1], face->vertices[2]->pos[2]);
         break;
     }

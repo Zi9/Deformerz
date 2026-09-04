@@ -6,24 +6,6 @@
 #include "raylib.h"
 #include <raymath.h>
 
-static const char* _PhysSeg2Str(TerepCarPhysLink* seg)
-{
-    switch (seg->type) {
-    case TEREP_PHYSLINK_NORMAL:
-        return "NORMAL";
-    case TEREP_PHYSLINK_SUSP_EXTRA:
-        return "SUSP_EXTRA";
-    case TEREP_PHYSLINK_SUSP_FRONT:
-        return "FRONT";
-    case TEREP_PHYSLINK_SUSP_FRONT2:
-        return "FRONT_2";
-    case TEREP_PHYSLINK_SUSP_REAR:
-        return "REAR";
-    case TEREP_PHYSLINK_SUSP_REAR2:
-        return "REAR_2";
-    }
-}
-
 static void _RecalculatePhysLinks(DFCar* dfcar)
 {
     TerepCar* car = dfcar->car;
@@ -34,7 +16,7 @@ static void _RecalculatePhysLinks(DFCar* dfcar)
         if (p->type == TEREP_PHYSLINK_SUSP_FRONT) {
             p->len_min = car->physLinks[j].len * 0.48;
             p->len_max = car->physLinks[j].len;
-        } else if (p->type == TEREP_PHYSLINK_SUSP_REAR2) {
+        } else if (p->type == TEREP_PHYSLINK_SUSP_REAR) {
             p->len_min = car->physLinks[j].len * 0.45;
             p->len_max = car->physLinks[j].len;
         } else if (p->type == TEREP_PHYSLINK_SUSP_EXTRA) {
@@ -79,7 +61,7 @@ static void _UI(DFCar* dfcar)
     }
     for (size_t i = 0; i < car->physLinkCount; i++) {
         TerepCarPhysLink* p = &car->physLinks[i];
-        igText("%i - %s = %i <-> %i | Min: %f (%f%) Max: %f (%f%) Val:%f/%f", i, _PhysSeg2Str(p), p->pointA->index,
+        igText("%i - %s = %i <-> %i | Min: %f (%f%) Max: %f (%f%) Val:%f/%f", i, TerepCar_PhysLink2String(p), p->pointA->index,
                p->pointB->index, p->len_min, 100.0f / p->len * p->len_min, p->len_max, 100.0f / p->len * p->len_max,
                p->len, p->len2);
     }

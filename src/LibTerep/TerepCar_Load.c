@@ -53,7 +53,7 @@ static void _ParseChunk2(TerepCar* car, TerepDat* dat)
             return;
         }
         if (car->physLinks[i].len != car->physLinks[i].len2) {
-            printf("XXXX\n");
+            printf("LibTerep | WARNING: Physics link length values do not match, car may be unstable\n");
         }
         dat->cur += 14;
     }
@@ -121,8 +121,8 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             dat->cur++;
             for (size_t i = 0; i < polygon->vertexCount; i++) {
                 polygon->vertices[i] = &car->points[U16(dat->cur, 2 * i * 3) / 2];
-                polygon->uv[i].x = U16(dat->cur, (2 * i * 3) + 2);
-                polygon->uv[i].y = U16(dat->cur, (2 * i * 3) + 4);
+                polygon->uv[i].x = U16(dat->cur, (2 * i * 3) + 2) / UV_SCALE;
+                polygon->uv[i].y = U16(dat->cur, (2 * i * 3) + 4) / UV_SCALE;
             }
             polygon->closed = U16(dat->cur, 0) == U16(dat->cur, 2 * 3 * polygon->vertexCount);
             dat->cur += (polygon->vertexCount + 1) * 3 * 2;
@@ -140,8 +140,8 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
                 wheel->wheelSprites[i].sz_width = U16(dat->cur, 2);
                 dat->cur += 4;
                 for (int j = 0; j < 4; j++) {
-                    wheel->wheelSprites[i].UV[j].x = U16(dat->cur, 0) / 65535.0f;
-                    wheel->wheelSprites[i].UV[j].y = U16(dat->cur, 2) / 65535.0f;
+                    wheel->wheelSprites[i].UV[j].x = U16(dat->cur, 0) / UV_SCALE;
+                    wheel->wheelSprites[i].UV[j].y = U16(dat->cur, 2) / UV_SCALE;
                     dat->cur += 4;
                 }
             }
@@ -154,7 +154,7 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
         }
         car->renderDataCount++;
     }
-    printf("LibTerep | INFO: Read %i items from chunk3\n", car->renderDataCount);
+    printf("LibTerep | INFO: Loaded %i render data items\n", car->renderDataCount);
 }
 
 TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
@@ -170,7 +170,7 @@ TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
     _ParseChunk1(car, dat);
     _ParseChunk2(car, dat);
     _ParseChunk3(car, dat);
-    printf("LibTerep | INFO: Finished parsing %s (%zu bytes)\n", dat->name, dat->size);
+    printf("LibTerep | INFO: Finished loading %s (%zu bytes)\n", dat->name, dat->size);
 
     if (carpcx != NULL) {
         car->carTexture = PCX_LoadImage(carpcx);

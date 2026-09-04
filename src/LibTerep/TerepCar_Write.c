@@ -85,7 +85,6 @@ static void _WriteChunk3(TerepCar* car, TerepDat* dat)
             if (polygon->closed) {
                 U16(dat->cur, 0) = polygon->vertices[0]->index * 2;
             } else {
-
                 U16(dat->cur, 0) = 0;
             }
             dat->cur += 2;
@@ -100,14 +99,14 @@ static void _WriteChunk3(TerepCar* car, TerepDat* dat)
             dat->cur++;
             for (size_t i = 0; i < polygon->vertexCount; i++) {
                 U16(dat->cur, 0) = polygon->vertices[i]->index * 2;
-                U16(dat->cur, 2) = polygon->uv[i].x;
-                U16(dat->cur, 4) = polygon->uv[i].y;
+                U16(dat->cur, 2) = polygon->uv[i].x * UV_SCALE;
+                U16(dat->cur, 4) = polygon->uv[i].y * UV_SCALE;
                 dat->cur += 3 * 2;
             }
             if (polygon->closed) {
                 U16(dat->cur, 0) = polygon->vertices[0]->index * 2;
-                U16(dat->cur, 2) = polygon->uv[0].x;
-                U16(dat->cur, 4) = polygon->uv[0].y;
+                U16(dat->cur, 2) = polygon->uv[0].x * UV_SCALE;
+                U16(dat->cur, 4) = polygon->uv[0].y * UV_SCALE;
             } else {
                 U16(dat->cur, 0) = 0;
                 U16(dat->cur, 2) = 0;
@@ -127,8 +126,8 @@ static void _WriteChunk3(TerepCar* car, TerepDat* dat)
                 U16(dat->cur, 2) = wheel->wheelSprites[i].sz_width;
                 dat->cur += 4;
                 for (int j = 0; j < 4; j++) {
-                    U16(dat->cur, 0) = round(wheel->wheelSprites[i].UV[j].x * 65535.0f);
-                    U16(dat->cur, 2) = round(wheel->wheelSprites[i].UV[j].y * 65535.0f);
+                    U16(dat->cur, 0) = round(wheel->wheelSprites[i].UV[j].x * UV_SCALE);
+                    U16(dat->cur, 2) = round(wheel->wheelSprites[i].UV[j].y * UV_SCALE);
                     dat->cur += 4;
                 }
             }
@@ -136,7 +135,7 @@ static void _WriteChunk3(TerepCar* car, TerepDat* dat)
         }
         }
     }
-    printf("LibTerep | INFO: Built %i items for %s\n", car->renderDataCount, dat->name);
+    printf("LibTerep | INFO: Built %i render data items for %s\n", car->renderDataCount, dat->name);
 }
 void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx)
 {

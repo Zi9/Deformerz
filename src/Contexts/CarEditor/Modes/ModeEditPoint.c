@@ -7,20 +7,6 @@
 
 static TerepCarPoint* _p;
 
-static const char* _Point2Str(TerepCarPoint* point)
-{
-    switch (point->type) {
-    case TEREP_POINT_GEOMETRY:
-        return "GEOMETRY";
-    case TEREP_POINT_CAMERA:
-        return "CAMERA";
-    case TEREP_POINT_WHEEL_FRONT:
-        return "WHEEL_F";
-    case TEREP_POINT_WHEEL_REAR:
-        return "WHEEL_R";
-    }
-}
-
 static void _RecalculatePhysLinks(DFCar* dfcar)
 {
     TerepCar* car = dfcar->car;
@@ -66,7 +52,7 @@ static void _UI(DFCar* dfcar)
         CarEditor_SwitchMode(CarEditorMode_Points());
     }
     igSameLine(0, 8);
-    igText("Editing Point: %i (%s)", _p->index, _Point2Str(_p));
+    igText("Editing Point: %i (%s)", _p->index, TerepCar_Point2String(_p));
     igSeparator();
 
     igSliderFloat3("Position", _p->pos, -1, 1, "", 0);

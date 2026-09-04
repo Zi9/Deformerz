@@ -5,23 +5,6 @@
 
 static int idx = 0;
 
-static const char* _RenderData2Str(TerepCarRenderDataItem* item)
-{
-    switch (item->type) {
-    case TEREP_RENDERDATA_NULL:
-        return "NULL";
-    case TEREP_RENDERDATA_CAMERA:
-        return "CAMERADATA";
-    case TEREP_RENDERDATA_UNK3_POLYGON:
-        return "UNK3_POLYGON";
-    case TEREP_RENDERDATA_COLOR_POLYGON:
-        return "COLOR_POLYGON";
-    case TEREP_RENDERDATA_TEXTURE_POLYGON:
-        return "TEXTURE_POLYGON";
-    case TEREP_RENDERDATA_WHEEL:
-        return "WHEELDATA";
-    }
-}
 
 static void _3D(DFCar* dfcar)
 {
@@ -55,7 +38,7 @@ static void _UI(DFCar* dfcar)
         if (car->renderData[i].type != TEREP_RENDERDATA_TEXTURE_POLYGON &&
             car->renderData[i].type != TEREP_RENDERDATA_COLOR_POLYGON)
             continue;
-        igText("%i - %s (%i) Closed: %s", i, _RenderData2Str(&car->renderData[i]),
+        igText("%i - %s (%i) Closed: %s", i, TerepCar_RenderType2String(&car->renderData[i]),
                car->renderData[i].polygon->vertexCount, car->renderData[i].polygon->closed ? "true" : "false");
         if (igIsItemHovered(0)) {
             idx = i;

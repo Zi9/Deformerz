@@ -47,6 +47,10 @@ static void _UI(DFCar* dfcar)
     if (igButton("Save", (ImVec2){0})) {
         TerepCar_Write(dfcar->car, dfcar->name, 0);
     }
+    igSameLine(0, 8);
+    if (igButton("Save as Text", (ImVec2){0})) {
+        TerepCar_WriteText(dfcar->car, "./data/car1.txt");
+    }
 
     igText("Points: %i", car->pointCount);
     igText("Physics Links: %i", car->physLinkCount);
