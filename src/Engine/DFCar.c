@@ -1,9 +1,9 @@
 #include "DFCar.h"
 #include "Engine/Engine.h"
 #include "LibTerep/TerepCar.h"
+#include <assert.h>
 #include <raylib.h>
 #include <rlgl.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 

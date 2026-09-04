@@ -1,5 +1,5 @@
-#include "Engine/DFCar.h"
 #include "Contexts/CarEditor/CarEditor.h"
+#include "Engine/DFCar.h"
 #include "Engine/UI.h"
 #include "LibTerep/TerepCar.h"
 #include "raymath.h"
@@ -12,7 +12,8 @@ static void _RecalculatePhysLinks(DFCar* dfcar)
     TerepCar* car = dfcar->car;
     for (int j = 0; j < car->physLinkCount; j++) {
         if (car->physLinks[j].pointA == _p || car->physLinks[j].pointB == _p) {
-            car->physLinks[j].len = Vector3Distance(ToVector3(car->physLinks[j].pointA->pos), ToVector3(car->physLinks[j].pointB->pos));
+            car->physLinks[j].len =
+                Vector3Distance(ToVector3(car->physLinks[j].pointA->pos), ToVector3(car->physLinks[j].pointB->pos));
             car->physLinks[j].len2 = car->physLinks[j].len;
             car->physLinks[j].len_min = car->physLinks[j].len * 0.5;
             car->physLinks[j].len_max = car->physLinks[j].len * 1.5;

@@ -61,9 +61,9 @@ static void _UI(DFCar* dfcar)
     }
     for (size_t i = 0; i < car->physLinkCount; i++) {
         TerepCarPhysLink* p = &car->physLinks[i];
-        igText("%i - %s = %i <-> %i | Min: %f (%f%) Max: %f (%f%) Val:%f/%f", i, TerepCar_PhysLink2String(p), p->pointA->index,
-               p->pointB->index, p->len_min, 100.0f / p->len * p->len_min, p->len_max, 100.0f / p->len * p->len_max,
-               p->len, p->len2);
+        igText("%i - %s = %i <-> %i | Min: %f (%f%) Max: %f (%f%) Val:%f/%f", i, TerepCar_PhysLink2String(p),
+               p->pointA->index, p->pointB->index, p->len_min, 100.0f / p->len * p->len_min, p->len_max,
+               100.0f / p->len * p->len_max, p->len, p->len2);
     }
     igSeparator();
     igPopID();

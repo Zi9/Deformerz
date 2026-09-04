@@ -12,7 +12,6 @@ typedef struct {
 DFCar* DFCar_Load();
 void DFCar_Unload(DFCar* dfcar);
 
-
 #define ToVector3(v)                                                                                                   \
     (Vector3) { v[0], v[1], v[2] }
 

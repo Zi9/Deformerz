@@ -5,7 +5,6 @@
 
 static int idx = 0;
 
-
 static void _3D(DFCar* dfcar)
 {
     TerepCar* car = dfcar->car;

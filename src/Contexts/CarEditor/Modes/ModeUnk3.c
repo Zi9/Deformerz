@@ -23,7 +23,8 @@ static void _3D(DFCar* dfcar)
     //    return;
     Color c = RED;
     for (int i = 0; i < car->renderDataCount; i++) {
-        if (car->renderData[i].type != TEREP_RENDERDATA_UNK3_POLYGON) continue;
+        if (car->renderData[i].type != TEREP_RENDERDATA_UNK3_POLYGON)
+            continue;
         TerepCarPolygonData* poly = car->renderData[i].polygon;
         if (i > 39)
             c = GREEN;

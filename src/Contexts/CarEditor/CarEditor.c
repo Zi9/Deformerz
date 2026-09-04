@@ -23,7 +23,7 @@ static void _Enter()
     _mode = CarEditorMode_Meta();
     _car = DFCar_Load();
     EditorCam_SetPosRot((Vector3){-0.75, 0.6, -0.75}, (Vector2){40, -30});
-    _viewport = LoadRenderTexture(1280/2, 1080/2);
+    _viewport = LoadRenderTexture(1280 / 2, 1080 / 2);
     _viewportQ1 = LoadRenderTexture(638, 538);
     _viewportQ2 = LoadRenderTexture(638, 538);
     _viewportQ3 = LoadRenderTexture(638, 538);
@@ -128,8 +128,7 @@ static void _Run()
         DrawTexturePro(
             _viewport.texture,
             (Rectangle){.x = 0, .y = 0, .width = _viewport.texture.width, .height = -_viewport.texture.height},
-            (Rectangle){.height = 1080, .width = 1280, .x = 640, .y = 0},
-            (Vector2){0}, 0, WHITE);
+            (Rectangle){.height = 1080, .width = 1280, .x = 640, .y = 0}, (Vector2){0}, 0, WHITE);
     }
 
     rlImGuiBegin();

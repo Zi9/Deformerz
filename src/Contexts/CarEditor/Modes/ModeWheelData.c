@@ -82,7 +82,8 @@ static void _UI(DFCar* dfcar)
     igSeparator();
 
     igInputInt("Sprite IDX", &idx, 1, 1, 0);
-    if (idx == 9) idx = 0;
+    if (idx == 9)
+        idx = 0;
 
     for (int i = 0; i < car->renderDataCount; i++) {
         if (car->renderData[i].type != TEREP_RENDERDATA_WHEEL)
@@ -92,9 +93,9 @@ static void _UI(DFCar* dfcar)
         if (igTreeNode_StrStr("##", "Wheel %i", wheel->wheelPoint->index)) {
             igText("Unknowns %i, %i", wheel->unknown1, wheel->unknown2);
             igSeparatorText("Sprites");
-            for (int j = 0; j < 9;j++)
-            {
-                igText("Wheel sprite %i - Height: %i, Width: %i", j, wheel->wheelSprites[j].sz_height, wheel->wheelSprites[j].sz_width);
+            for (int j = 0; j < 9; j++) {
+                igText("Wheel sprite %i - Height: %i, Width: %i", j, wheel->wheelSprites[j].sz_height,
+                       wheel->wheelSprites[j].sz_width);
             }
             igTreePop();
         }

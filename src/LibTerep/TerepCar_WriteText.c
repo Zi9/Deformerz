@@ -9,8 +9,8 @@ static void _WriteChunk1(TerepCar* car, FILE* f)
     fprintf(f, "POINTS_START:\n");
     for (size_t i = 0; i < car->pointCount; i++) {
         TerepCarPoint pt = car->points[i];
-        fprintf(f, "  %s @ %.9f, %.9f, %.9f | Size: %.9f | Unknowns: %i, %i, %i\n", TerepCar_Point2String(&pt), pt.pos[0],
-                pt.pos[1], pt.pos[2], pt.size, pt.unknown[0], pt.unknown[1], pt.unknown[2]);
+        fprintf(f, "  %s @ %.9f, %.9f, %.9f | Size: %.9f | Unknowns: %i, %i, %i\n", TerepCar_Point2String(&pt),
+                pt.pos[0], pt.pos[1], pt.pos[2], pt.size, pt.unknown[0], pt.unknown[1], pt.unknown[2]);
     }
     fprintf(f, "POINTS_END:\n");
     printf("LibTerep | INFO: Converted %d points to text\n", car->pointCount);

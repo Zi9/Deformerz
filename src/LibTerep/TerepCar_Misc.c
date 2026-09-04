@@ -1,8 +1,8 @@
 #define LIBTEREP_INTERNAL
 #include "TerepCar.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 const char* TerepCar_Point2String(TerepCarPoint* point)
 {
