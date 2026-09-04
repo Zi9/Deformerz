@@ -1,147 +1,67 @@
 #include "Engine.h"
-#include "Engine/Rendering/DFCamera.h"
-#include "LibTerep/PCX.h"
-#include "Rendering/Renderer.h"
+#include "Contexts/CarEditor/CarEditor.h"
+#include "UI.h"
 #include <raylib.h>
 
-EngineData Engine = {0};
+static EngineContext _Current = {0};
+static EngineContext _Next = {0};
+static bool _WantSwitchContext = false;
 
-void Engine_Initialize()
+Color Engine_Palette[256] = {0};
+Color Engine_SkyColor = GRAY;
+
+static void _SwitchContextIfRequested()
+{
+    if (!_WantSwitchContext)
+        return;
+    if (_Current.OnExit != 0) {
+        _Current.OnExit();
+    }
+    _Current = _Next;
+    if (_Current.OnEnter != 0) {
+        _Current.OnEnter();
+    }
+    _WantSwitchContext = false;
+    _Next = (EngineContext){0};
+}
+
+void Engine_SwitchContext(EngineContext ctx)
+{
+    _WantSwitchContext = true;
+    _Next = ctx;
+}
+
+int main()
 {
     SetTraceLogLevel(LOG_ERROR);
+    SetTargetFPS(MAXFPS);
+
+    InitWindow(WINDOW_W, WINDOW_H, WINDOW_TITLE);
+    rlImGuiSetup(true);
+
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    Renderer_Initialize();
-    SetTargetFPS(60);
-    PCX_EnableGlobalPalette("./data/col.pcx");
-    Engine.map = DFMap_Load();
-    Engine.car = DFCar_Load();
-    DFCamera_SetPos((Vector3) {0, 0, 3});
-}
+    _Current = CarEditorContext();
 
-void Engine_Loop()
-{
-    Engine.dt = GetFrameTime();
-    Engine.time += Engine.dt;
-    DFCamera_Update();
-    Renderer_Render();
-}
-
-void Engine_Destroy()
-{
-    Renderer_Destroy();
-    DFCar_Unload(Engine.car);
-    DFMap_Unload(Engine.map);
-    //TerepMap_Unload(Engine.map);
-}
-
-void Engine_Main()
-{
-    Engine_Initialize();
-    while (!WindowShouldClose()) {
-        Engine_Loop();
+    PCX_EnableGlobalPalette("./data/col.pcx"); // HACK: Fix this hardcoding at some point
+    for (size_t i = 0; i < 256; i++) {
+        Engine_Palette[i].r = PCX_GLOBAL_PALETTE[i].red;
+        Engine_Palette[i].g = PCX_GLOBAL_PALETTE[i].green;
+        Engine_Palette[i].b = PCX_GLOBAL_PALETTE[i].blue;
+        Engine_Palette[i].a = 255;
     }
-    Engine_Destroy();
-}
+    Engine_SkyColor = Engine_Palette[255];
 
-/*
-struct GameState {
-    DFMap* currentMap;
-    DFCar* currentCar;
-    struct {
-        bool wireframe;
-    } render;
-} game = {0};
-
-void game_load(Config cfg)
-{
-    game.activeCam = camera_create();
-    game.currentMap = map_load(cfg.baseDataPath);
-    game.currentCar = car_load("./data/terep/car2.dat");
-    game.currentCar->currentSelSeg = 0;
-    game.render.wireframe = false;
-}
-
-void game_unload()
-{
-    if (game.currentMap != NULL) {
-        map_unload(game.currentMap);
-        game.currentMap = NULL;
-    }
-    if (game.currentCar != NULL) {
-        car_unload(game.currentCar);
-        game.currentCar = NULL;
-    }
-}
-
-void game_render()
-{
-    if (game.currentMap != NULL)
-        map_render(game.currentMap);
-    if (game.currentCar != NULL)
-        car_render(game.currentCar);
-}
-
-Config game_main(Config initialConfig)
-{
-    Config cfg = initialConfig;
-    InitWindow(cfg.render.width * cfg.render.upscaleMultiplier, cfg.render.height * cfg.render.upscaleMultiplier,
-               GAME_WINDOW_TITLE);
-    SetTargetFPS(60);
-    //SetExitKey(KEY_CAPS_LOCK);
-
-    RenderTexture2D target;
-    if (cfg.render.upscaleMultiplier == 1) {
-        target = LoadRenderTexture(cfg.render.width * cfg.render.upscaleMultiplier,
-                                   cfg.render.height * cfg.render.upscaleMultiplier);
-    } else {
-        target = LoadRenderTexture(cfg.render.width, cfg.render.height);
-    }
-
-    game_load(cfg);
+    if (_Current.OnEnter != 0)
+        _Current.OnEnter();
 
     while (!WindowShouldClose()) {
-        camera_update(&game.activeCam, GetFrameTime());
-
-        // if (IsKeyPressed(KEY_F1))
-        //     cfg.restart = false;
-
-        if (IsKeyPressed(KEY_F7))
-            game.render.wireframe = !game.render.wireframe;
-        if (IsKeyPressed(KEY_RIGHT))
-            game.currentCar->currentSelSeg++;
-        if (IsKeyPressed(KEY_LEFT))
-            game.currentCar->currentSelSeg--;
-        // if (IsKeyPressed(KEY_F8))
-        game.currentMap->model.materials[0].shader = game.currentMap->affineShd;
-        // if (IsKeyPressed(KEY_F9))
-        //     map->model.materials[0].shader = map->normalShd;
-
-        BeginDrawing();
-        BeginTextureMode(target);
-        ClearBackground(cfg.skyColor);
-
-        BeginMode3D(game.activeCam.rlCam);
-
-        if (game.render.wireframe)
-            rlEnableWireMode();
-        game_render();
-        if (game.render.wireframe)
-            rlDisableWireMode();
-
-        EndMode3D();
-
-        EndTextureMode();
-
-        DrawTexturePro(target.texture, (Rectangle){0, 0, target.texture.width, -target.texture.height},
-                       (Rectangle){0, 0, cfg.render.width * cfg.render.upscaleMultiplier,
-                                   cfg.render.height * cfg.render.upscaleMultiplier},
-                       (Vector2){0, 0}, 0.0f, WHITE);
-        DrawText("Deformers - Development Build", 1, 1, 20, BLACK);
-        DrawText("Deformers - Development Build", 0, 0, 20, RED);
-        EndDrawing();
+        _SwitchContextIfRequested();
+        _Current.Run();
     }
-    game_unload();
+
+    if (_Current.OnExit != 0)
+        _Current.OnExit();
+
+    rlImGuiShutdown();
     CloseWindow();
-    return cfg;
 }
-*/

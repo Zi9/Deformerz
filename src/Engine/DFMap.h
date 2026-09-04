@@ -12,3 +12,4 @@ typedef struct {
 
 DFMap* DFMap_Load();
 void DFMap_Unload(DFMap* dfmap);
+void DFMap_Render(DFMap* dfmap);

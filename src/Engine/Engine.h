@@ -1,24 +1,21 @@
 #pragma once
 
-#include "Engine/Core/DFCar.h"
-#include "Engine/Core/DFMap.h"
 #include <raylib.h>
 
-#define GAME_WINDOW_TITLE "Deformerz - A recreation of Terep2"
-#define WMARK "Deformerz - v0.1"
+#define WINDOW_TITLE "Deformerz - A recreation of Terep2"
+#define WINDOW_W 1920
+#define WINDOW_H 1080
+#define MAXFPS 60
 
+extern Color Engine_Palette[256];
+extern Color Engine_SkyColor;
 
 typedef struct {
-    float dt;
-    float time;
-
-    DFCar* car;
-    DFMap* map;
-
-    Color skyColor;
-    Color palette[256];
-} EngineData;
-
-extern EngineData Engine;
+    void (*OnEnter)(void);
+    void (*OnExit)(void);
+    void (*Run)(void);
+} EngineContext;
 
 void Engine_Main();
+
+void Engine_SwitchContext(EngineContext ctx);

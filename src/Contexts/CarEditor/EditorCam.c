@@ -1,22 +1,14 @@
-#include "DFCamera.h"
-
-#include "Engine/Engine.h"
+#include "EditorCam.h"
 
 #include <math.h>
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 
-#define CAMERA_DEFAULT_MOUSE_SENS 0.2
-#define CAMERA_DEFAULT_SPEED 10.0
+#define CAMERA_DEFAULT_MOUSE_SENS 0.1
+#define CAMERA_DEFAULT_SPEED 1.0
 #define CAMERA_SPEED_MOD_MULT 10
 
-#define SHOW_INFO_TIME 0.5
-const int xhairSize = 10;
-
-float showInfoCounter = 0;
-
-struct DFCamera {
+struct EditorCam {
     float mouseSens, camSpeed;
     Vector2 view;
     bool freecamEnabled;
@@ -34,9 +26,9 @@ struct DFCamera {
     .forward = {0, 0, -1},
     .mouseDelta = {0, 0},
     .rlCam = {
-        .position = {0, 0, 0}, .target = {0, 0, -1}, .up = {0, 1, 0}, .fovy = 90, .projection = CAMERA_PERSPECTIVE}};
+        .position = {0, 0, 0}, .target = {0, 0, -1}, .up = {0, 1, 0}, .fovy = 75, .projection = CAMERA_PERSPECTIVE}};
 
-static void SetFreecam(bool enable)
+static void _SetFreecam(bool enable)
 {
     CAM.freecamEnabled = enable;
     if (enable) {
@@ -47,7 +39,7 @@ static void SetFreecam(bool enable)
     }
 }
 
-static void RecalculateCamera()
+static void _RecalculateCamera()
 {
     CAM.forward.x = cosf(DEG2RAD * CAM.view.x) * cosf(DEG2RAD * CAM.view.y);
     CAM.forward.y = sinf(DEG2RAD * CAM.view.y);
@@ -58,69 +50,44 @@ static void RecalculateCamera()
     CAM.rlCam.target = Vector3Add(CAM.rlCam.position, CAM.forward);
 }
 
-void DFCamera_BeginRender() { BeginMode3D(CAM.rlCam); }
-void DFCamera_EndRender()
-{
-    EndMode3D();
-    float screenMiddleX = GetScreenWidth() / 2.0;
-    float screenMiddleY = GetScreenHeight() / 2.0;
-    if (CAM.freecamEnabled) {
-        // We inject a bit of camera info rendering in here to show speed changes and stuff
-        if (showInfoCounter > 0) {
-            char text[64];
-            snprintf(text, 64, "SPEED: %f\nFOV:%f", CAM.camSpeed, CAM.rlCam.fovy);
-            DrawText(text, screenMiddleX + 32, screenMiddleY + 32, 20, GREEN);
-        }
-        // Also a crosshair
-        DrawLine(screenMiddleX - xhairSize, screenMiddleY, screenMiddleX + xhairSize, screenMiddleY, WHITE);
-        DrawLine(screenMiddleX, screenMiddleY - xhairSize, screenMiddleX, screenMiddleY + xhairSize, WHITE);
-        char postext[128];
-        snprintf(postext, 128, "DFCamera DEBUG\n-----------------\nX:%f\nY:%f\nZ:%f\nVX:%f\nVY:%f\n",
-                 CAM.rlCam.position.x, CAM.rlCam.position.y, CAM.rlCam.position.z, CAM.view.x, CAM.view.y);
-        DrawText(postext, 5, 25, 10, WHITE);
-    }
-}
+void EditorCam_BeginRender() { BeginMode3D(CAM.rlCam); }
+void EditorCam_EndRender() { EndMode3D(); }
 
-void DFCamera_SetPos(Vector3 pos)
+void EditorCam_SetPos(Vector3 pos)
 {
     CAM.rlCam.position = pos;
-    RecalculateCamera();
+    _RecalculateCamera();
 }
-void DFCamera_SetRot(Vector2 rot)
+void EditorCam_SetRot(Vector2 rot)
 {
     CAM.view = rot;
-    RecalculateCamera();
+    _RecalculateCamera();
 }
-void DFCamera_SetPosRot(Vector3 pos, Vector2 rot)
+void EditorCam_SetPosRot(Vector3 pos, Vector2 rot)
 {
     CAM.rlCam.position = pos;
     CAM.view = rot;
-    RecalculateCamera();
+    _RecalculateCamera();
 }
-Vector3 DFCamera_GetPos() { return CAM.rlCam.position; }
-Vector2 DFCamera_GetRot() { return CAM.view; }
+Vector3 EditorCam_GetPos() { return CAM.rlCam.position; }
+Vector2 EditorCam_GetRot() { return CAM.view; }
 
-void DFCamera_Update()
+void EditorCam_Update()
 {
-    if (showInfoCounter > 0) {
-        showInfoCounter -= Engine.dt;
-    }
-
     if (IsKeyPressed(KEY_F3)) {
         if (CAM.freecamEnabled)
-            SetFreecam(false);
+            _SetFreecam(false);
         else
-            SetFreecam(true);
+            _SetFreecam(true);
     }
     if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
-        SetFreecam(true);
+        _SetFreecam(true);
     if (IsMouseButtonReleased(MOUSE_RIGHT_BUTTON))
-        SetFreecam(false);
+        _SetFreecam(false);
 
     if (CAM.freecamEnabled) {
         float mwheel = GetMouseWheelMove();
         if (mwheel != 0) {
-            showInfoCounter = SHOW_INFO_TIME;
             if (IsKeyDown(KEY_LEFT_CONTROL)) {
                 CAM.rlCam.fovy -= GetMouseWheelMove() * 2;
             } else {
@@ -140,7 +107,7 @@ void DFCamera_Update()
         else if (CAM.view.y < -89.9f)
             CAM.view.y = -89.9f;
 
-        float vel = Engine.dt;
+        float vel = GetFrameTime();
         if (IsKeyDown(KEY_LEFT_SHIFT))
             vel *= CAM.camSpeed * CAMERA_SPEED_MOD_MULT;
         else if (IsKeyDown(KEY_LEFT_ALT))
@@ -161,6 +128,7 @@ void DFCamera_Update()
             CAM.rlCam.position = Vector3Add(CAM.rlCam.position, Vector3Multiply(CAM.up, v));
         if (IsKeyDown(KEY_Q))
             CAM.rlCam.position = Vector3Subtract(CAM.rlCam.position, Vector3Multiply(CAM.up, v));
-        RecalculateCamera();
+        _RecalculateCamera();
     }
 }
+Camera EditorCam_GetRLCamera() { return CAM.rlCam; }
