@@ -45,10 +45,10 @@ This chunk contains an array of 3D space points in XZY format. Some points are s
 | 6      | `int16`  | Z position value of the point                                   |
 | 8      | `int16`  | Unknown value                                                   |
 | 10     | `int16`  | Y position value of the point                                   |
-| 24     | `int16`  | Size value of the point (only for camera and wheel type points) |
-| 26     | `int16`  | Point type designator (see table below)                         |
+| 26     | `int16`  | Size value of the point (only for camera and wheel type points) |
+| 28     | `int16`  | Point type designator (see table below)                         |
 
-The point contains 10 null bytes which appear to be padding or also used for runtime data storage.
+The point contains 12 null bytes which appear to be padding or also used for runtime data storage.
 
 #### Point Types
 
@@ -122,7 +122,7 @@ This item is always a 3 point polygon which seems to affect the culling of wheel
 | 0      | `uint16` | Double of the index of the point. There is 3 of them sequentially |
 | 6      | `uint8`  | Unknown value                                                     |
 | 8      | `uint8`  | Unknown value                                                     |
-| 12     | `uint8`  | Unknown value                                                     |
+| 10     | `uint8`  | Unknown value                                                     |
 
 ##### Colored Polygon Item (ID 4 - 0x04)
 
@@ -132,8 +132,8 @@ This item is variable length based on the amount of points defined in the polygo
 | --------- | -------- | --------------------------------------------------------------------- |
 | 0         | `uint8`  | Count of points in the polygon                                        |
 | 1         | `uint16` | Double of the index of the point. These repeat by the amount of count |
-| 2*count+1 | `uint8`  | Palette index value                                                   |
-| 2*count+2 | `uint8`  | Palette index value                                                   |
+| 2*(count+1) | `uint8`  | Palette index value                                                   |
+| 2*(count+1)+2 | `uint8`  | Palette index value                                                   |
 
 Polygons seem to contain one more point than what would usually be defined. For rendered polygons this last point is usually a duplicate of the first point. Shadow polygons seem to have the index 0.
 
@@ -154,7 +154,7 @@ Sidenote, the game bundles textures with a size of 320x200 but discards the 64 p
 
 ##### Wheel Properties Item (ID 10 - 0x0A)
 
-This item is always 187 bytes in size.
+This item is always 186 bytes in size.
 
 | Offset | Datatype         | Description                                                                      |
 | ------ | ---------------- | -------------------------------------------------------------------------------- |
