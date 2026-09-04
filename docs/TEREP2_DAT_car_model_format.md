@@ -113,6 +113,17 @@ This item is always 4 bytes.
 | 2      | `uint8`  | Unknown value, usually 15                                             |
 | 3      | `uint8`  | Unknown value, usually 15                                             |
 
+##### Unknown Culling Polygon Item (ID 3 - 0x03)
+
+This item is always a 3 point polygon which seems to affect the culling of wheels during rendering. Always 12 bytes long.
+
+| Offset | Datatype | Description                                                       |
+| ------ | -------- | ----------------------------------------------------------------- |
+| 0      | `uint16` | Double of the index of the point. There is 3 of them sequentially |
+| 6      | `uint8`  | Unknown value                                                     |
+| 8      | `uint8`  | Unknown value                                                     |
+| 12     | `uint8`  | Unknown value                                                     |
+
 ##### Colored Polygon Item (ID 4 - 0x04)
 
 This item is variable length based on the amount of points defined in the polygon. The color items can be set independently, if they differ then the game dithers between the two colors for the polygon.
