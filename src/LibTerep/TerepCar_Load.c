@@ -36,7 +36,7 @@ static void _ParseChunk2(TerepCar* car, TerepDat* dat)
     dat->cur = dat->data + U16(dat->data, 2);
     car->physLinkCount = U16(dat->cur, 0);
     car->physLinks = calloc(car->physLinkCount, sizeof(TerepCarPhysLink));
-    assert(car->points);
+    assert(car->physLinks);
     dat->cur += 2;
     for (size_t i = 0; i < car->physLinkCount; i++) {
         car->physLinks[i].pointA = &car->points[U16(dat->cur, 0)];
@@ -74,7 +74,7 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
         case TEREP_RENDERDATA_CAMERA: {
             TerepCarCameraData* cam = calloc(1, sizeof(TerepCarCameraData));
             car->renderData[car->renderDataCount].camera = cam;
-            cam->cameraPoint = &car->points[U16(dat->cur, 0) / 2];
+            cam->cameraPoint = &car->points[U16(dat->cur, 0) >> 1];
             if (cam->cameraPoint->type != TEREP_POINT_CAMERA) {
                 printf("LibTerep | ERROR: Failure parsing %s -- Chunk3 -> Camera point (id 0x1) index is not a camera "
                        "point, "
@@ -91,9 +91,9 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
             car->renderData[car->renderDataCount].polygon = polygon;
             polygon->vertexCount = 3;
-            polygon->vertices[0] = &car->points[U16(dat->cur, 0) / 2];
-            polygon->vertices[1] = &car->points[U16(dat->cur, 2) / 2];
-            polygon->vertices[2] = &car->points[U16(dat->cur, 4) / 2];
+            polygon->vertices[0] = &car->points[U16(dat->cur, 0) >> 1];
+            polygon->vertices[1] = &car->points[U16(dat->cur, 2) >> 1];
+            polygon->vertices[2] = &car->points[U16(dat->cur, 4) >> 1];
             polygon->unknown3values[0] = U16(dat->cur, 6);
             polygon->unknown3values[1] = U16(dat->cur, 8);
             polygon->unknown3values[2] = U16(dat->cur, 10);
@@ -106,7 +106,13 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             polygon->vertexCount = U8(dat->cur, 0);
             dat->cur++;
             for (size_t i = 0; i < polygon->vertexCount; i++) {
-                polygon->vertices[i] = &car->points[U16(dat->cur, 2 * i) / 2];
+                if (i == 0) {
+                    polygon->isProjectedOnGround = !(U16(dat->cur, 2 * i) & 1);
+                } else if (polygon->isProjectedOnGround == (U16(dat->cur, 2 * i) & 1)) {
+                    printf("LibTerep | WARNING: One of the polygons has inconsistent 'snap to ground' mapping, this is "
+                           "awful...\n");
+                }
+                polygon->vertices[i] = &car->points[U16(dat->cur, 2 * i) >> 1];
             }
             polygon->closed = U16(dat->cur, 0) == U16(dat->cur, 2 * polygon->vertexCount);
             polygon->colors[0] = U8(dat->cur, 2 * polygon->vertexCount + 2);
@@ -120,7 +126,13 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             polygon->vertexCount = U8(dat->cur, 0);
             dat->cur++;
             for (size_t i = 0; i < polygon->vertexCount; i++) {
-                polygon->vertices[i] = &car->points[U16(dat->cur, 2 * i * 3) / 2];
+                if (i == 0) {
+                    polygon->isProjectedOnGround = !(U16(dat->cur, 2 * i * 3) & 1);
+                } else if (polygon->isProjectedOnGround == (U16(dat->cur, 2 * i * 3) & 1)) {
+                    printf("LibTerep | WARNING: One of the polygons has inconsistent 'snap to ground' mapping, this is "
+                           "awful...\n");
+                }
+                polygon->vertices[i] = &car->points[U16(dat->cur, 2 * i * 3) >> 1];
                 polygon->uv[i].x = U16(dat->cur, (2 * i * 3) + 2) / UV_SCALE;
                 polygon->uv[i].y = U16(dat->cur, (2 * i * 3) + 4) / UV_SCALE;
             }
@@ -131,7 +143,7 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
         case TEREP_RENDERDATA_WHEEL: {
             TerepCarWheelData* wheel = calloc(1, sizeof(TerepCarWheelData));
             car->renderData[car->renderDataCount].wheel = wheel;
-            wheel->wheelPoint = &car->points[U16(dat->cur, 0) / 2];
+            wheel->wheelPoint = &car->points[U16(dat->cur, 0) >> 1];
             wheel->unknown1 = U16(dat->cur, 2);
             wheel->unknown2 = U16(dat->cur, 4);
             dat->cur += 3 * 2;

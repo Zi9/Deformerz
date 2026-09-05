@@ -25,10 +25,14 @@ const char* TerepCar_PhysLink2String(TerepCarPhysLink* seg)
         return "NORMAL";
     case TEREP_PHYSLINK_SUSP_EXTRA:
         return "SUSP_EXTRA";
-    case TEREP_PHYSLINK_SUSP_FRONT:
-        return "FRONT";
-    case TEREP_PHYSLINK_SUSP_REAR:
-        return "REAR";
+    case TEREP_PHYSLINK_SUSP_REAR4:
+        return "REAR4";
+    case TEREP_PHYSLINK_SUSP_REAR6:
+        return "REAR6";
+    case TEREP_PHYSLINK_SUSP_FRONT10:
+        return "FRONT10";
+    case TEREP_PHYSLINK_SUSP_FRONT12:
+        return "FRONT12";
     }
 }
 

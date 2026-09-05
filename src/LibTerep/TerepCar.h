@@ -48,8 +48,10 @@ typedef struct {
     enum {
         TEREP_PHYSLINK_SUSP_EXTRA = 0,
         TEREP_PHYSLINK_NORMAL = 1,
-        TEREP_PHYSLINK_SUSP_REAR = 6,
-        TEREP_PHYSLINK_SUSP_FRONT = 10
+        TEREP_PHYSLINK_SUSP_REAR4 = 4,
+        TEREP_PHYSLINK_SUSP_REAR6 = 6,
+        TEREP_PHYSLINK_SUSP_FRONT10 = 10,
+        TEREP_PHYSLINK_SUSP_FRONT12 = 12
     } type;
     TerepCarPoint* pointA;
     TerepCarPoint* pointB;
@@ -67,6 +69,7 @@ typedef struct {
     uint8_t vertexCount;
     TerepCarPoint* vertices[TEREP_MAX_POLYGON_POINTS];
     bool closed;
+    bool isProjectedOnGround;
     union {
         uint16_t unknown3values[3];
         uint8_t colors[2];
