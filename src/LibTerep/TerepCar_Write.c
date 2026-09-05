@@ -75,7 +75,7 @@ static void _WriteChunk3(TerepCar* car, TerepDat* dat)
             U8(dat->cur, 0) = polygon->vertexCount;
             dat->cur++;
             for (size_t i = 0; i < polygon->vertexCount; i++) {
-                if (!polygon->closed) {
+                if (!polygon->isProjectedOnGround) {
                     U16(dat->cur, 0) = polygon->vertices[i]->index * 2 + 1;
                 } else {
                     U16(dat->cur, 0) = polygon->vertices[i]->index * 2;
@@ -83,7 +83,11 @@ static void _WriteChunk3(TerepCar* car, TerepDat* dat)
                 dat->cur += 2;
             }
             if (polygon->closed) {
-                U16(dat->cur, 0) = polygon->vertices[0]->index * 2;
+                if (!polygon->isProjectedOnGround) {
+                    U16(dat->cur, 0) = polygon->vertices[0]->index * 2 + 1;
+                } else {
+                    U16(dat->cur, 0) = polygon->vertices[0]->index * 2;
+                }
             } else {
                 U16(dat->cur, 0) = 0;
             }
