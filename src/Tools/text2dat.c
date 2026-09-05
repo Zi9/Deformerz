@@ -1,9 +1,13 @@
 #include "LibTerep/TerepCar.h"
 #include <stdio.h>
+
+#ifndef WIN32
 #include <unistd.h>
+#endif // WIN32
 
 int main(int argc, const char* argv[])
 {
+#ifndef WIN32
     printf("████████╗███████╗██╗  ██╗████████╗██████╗ ██████╗  █████╗ ████████╗\n");
     printf("╚══██╔══╝██╔════╝╚██╗██╔╝╚══██╔══╝╚════██╗██╔══██╗██╔══██╗╚══██╔══╝\n");
     printf("   ██║   █████╗   ╚███╔╝    ██║    █████╔╝██║  ██║███████║   ██║   \n");
@@ -11,16 +15,22 @@ int main(int argc, const char* argv[])
     printf("   ██║   ███████╗██╔╝ ██╗   ██║   ███████╗██████╔╝██║  ██║   ██║   \n");
     printf("   ╚═╝   ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═════╝ ╚═╝  ╚═╝   ╚═╝   \n");
     printf("-- Built by Zi9 for the LibTerep/Deformerz project ----------------\n\n");
+#else // WIN32
+    printf("--==[ text2dat ]==--\n");
+    printf("-- Built by Zi9 for the LibTerep/Deformerz project\n\n");
+#endif // WIN32
 
     if (argc != 3) {
         printf("Invalid number of arguments!\n");
         printf("Use like this: ./text2dat car1.txt car1.dat\n");
         return -1;
     }
+#ifndef WIN32
     if (access(argv[1], F_OK) != 0) {
         printf("text2dat | ERROR: Could not open source file %s!\n", argv[1]);
         return -1;
     }
+#endif // WIN32
 
     printf("text2dat | INFO: Converting %s to %s via LibTerep...\n", argv[1], argv[2]);
     TerepCar* car = TerepCar_LoadText(argv[1]);

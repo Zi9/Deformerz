@@ -1,6 +1,7 @@
 #define LIBTEREP_INTERNAL
 #include "TerepCar.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -15,6 +16,8 @@ const char* TerepCar_Point2String(TerepCarPoint* point)
         return "WHEEL_F";
     case TEREP_POINT_WHEEL_REAR:
         return "WHEEL_R";
+    default:
+        assert(0 && "Unknown point type");
     }
 }
 
@@ -29,6 +32,8 @@ const char* TerepCar_PhysLink2String(TerepCarPhysLink* seg)
         return "FRONT";
     case TEREP_PHYSLINK_SUSP_REAR:
         return "REAR";
+    default:
+        assert(0 && "Unknown link type");
     }
 }
 
@@ -47,6 +52,8 @@ const char* TerepCar_RenderType2String(TerepCarRenderDataItem* item)
         return "TEXTURE_POLYGON";
     case TEREP_RENDERDATA_WHEEL:
         return "WHEELDATA";
+    default:
+        assert(0 && "Unknown render type");
     }
 }
 

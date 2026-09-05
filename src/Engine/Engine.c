@@ -8,7 +8,7 @@ static EngineContext _Next = {0};
 static bool _WantSwitchContext = false;
 
 Color Engine_Palette[256] = {0};
-Color Engine_SkyColor = GRAY;
+Color Engine_SkyColor = {130, 130, 130, 255}; // GRAY
 
 static void _SwitchContextIfRequested()
 {
