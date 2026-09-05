@@ -1,6 +1,5 @@
 #include "LibTerep/TerepCar.h"
 #include <stdio.h>
-#include <unistd.h>
 
 static inline int GetFileSize(FILE* f)
 {
