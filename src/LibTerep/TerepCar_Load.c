@@ -107,8 +107,8 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             dat->cur++;
             for (size_t i = 0; i < polygon->vertexCount; i++) {
                 if (i == 0) {
-                    polygon->isProjectedOnGround = !(U16(dat->cur, 2 * i) & 1);
-                } else if (polygon->isProjectedOnGround == (U16(dat->cur, 2 * i) & 1)) {
+                    polygon->isProjectedOnGround = (U16(dat->cur, 2 * i) & 1);
+                } else if (polygon->isProjectedOnGround != (U16(dat->cur, 2 * i) & 1)) {
                     printf("LibTerep | WARNING: One of the polygons has inconsistent 'snap to ground' mapping, this is "
                            "awful...\n");
                 }
@@ -127,8 +127,8 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             dat->cur++;
             for (size_t i = 0; i < polygon->vertexCount; i++) {
                 if (i == 0) {
-                    polygon->isProjectedOnGround = !(U16(dat->cur, 2 * i * 3) & 1);
-                } else if (polygon->isProjectedOnGround == (U16(dat->cur, 2 * i * 3) & 1)) {
+                    polygon->isProjectedOnGround = (U16(dat->cur, 2 * i * 3) & 1);
+                } else if (polygon->isProjectedOnGround != (U16(dat->cur, 2 * i * 3) & 1)) {
                     printf("LibTerep | WARNING: One of the polygons has inconsistent 'snap to ground' mapping, this is "
                            "awful...\n");
                 }

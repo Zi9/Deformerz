@@ -60,7 +60,7 @@ static bool TestTextRebuild(const char* file, const char* outfile)
     car = TerepCar_LoadText(validation_text);
     TerepCar_Write(car, outfile, NULL);
     TerepCar_Unload(car);
-    remove(validation_text);
+    //remove(validation_text);
 
     bool result = Validate(file, outfile);
 

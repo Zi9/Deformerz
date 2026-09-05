@@ -37,8 +37,8 @@ static void _UI(DFCar* dfcar)
         if (car->renderData[i].type != TEREP_RENDERDATA_TEXTURE_POLYGON &&
             car->renderData[i].type != TEREP_RENDERDATA_COLOR_POLYGON)
             continue;
-        igText("%i - %s (%i) Closed: %s", i, TerepCar_RenderType2String(&car->renderData[i]),
-               car->renderData[i].polygon->vertexCount, car->renderData[i].polygon->closed ? "true" : "false");
+        igText("%i - %s (%i) Closed: %s / Ground Project: %d", i, TerepCar_RenderType2String(&car->renderData[i]),
+               car->renderData[i].polygon->vertexCount, car->renderData[i].polygon->closed ? "true" : "false", car->renderData[i].polygon->isProjectedOnGround);
         if (igIsItemHovered(0)) {
             idx = i;
         }
