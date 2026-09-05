@@ -56,14 +56,22 @@ static void _ParseChunk2(TerepCar* car, FILE* f)
             sscanf(_tmp, "  NORMAL | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
                    &p->len2, &p->len_min, &p->len_max);
             p->type = TEREP_PHYSLINK_NORMAL;
-        } else if (STARTSWITH("  FRONT")) {
-            sscanf(_tmp, "  FRONT | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
+        } else if (STARTSWITH("  REAR4")) {
+            sscanf(_tmp, "  REAR4 | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
                    &p->len2, &p->len_min, &p->len_max);
-            p->type = TEREP_PHYSLINK_SUSP_FRONT;
-        } else if (STARTSWITH("  REAR")) {
-            sscanf(_tmp, "  REAR | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
+            p->type = TEREP_PHYSLINK_SUSP_REAR4;
+        } else if (STARTSWITH("  REAR6")) {
+            sscanf(_tmp, "  REAR6 | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
                    &p->len2, &p->len_min, &p->len_max);
-            p->type = TEREP_PHYSLINK_SUSP_REAR;
+            p->type = TEREP_PHYSLINK_SUSP_REAR6;
+        } else if (STARTSWITH("  FRONT10")) {
+            sscanf(_tmp, "  FRONT10 | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
+                   &p->len2, &p->len_min, &p->len_max);
+            p->type = TEREP_PHYSLINK_SUSP_FRONT10;
+        } else if (STARTSWITH("  FRONT12")) {
+            sscanf(_tmp, "  FRONT12 | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
+                   &p->len2, &p->len_min, &p->len_max);
+            p->type = TEREP_PHYSLINK_SUSP_FRONT12;
         } else if (STARTSWITH("  SUSP_EXTRA")) {
             sscanf(_tmp, "  SUSP_EXTRA | %i <-> %i | Length: %f / %f | Min: %f | Max: %f", &pointA, &pointB, &p->len,
                    &p->len2, &p->len_min, &p->len_max);

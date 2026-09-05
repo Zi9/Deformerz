@@ -1,4 +1,4 @@
-# Terep2 DAT Car Model File Format
+ Terep2 DAT Car Model File Format
 
 This document is the result of reverse engineering the Terep2 car data files in an attempt to fully understand them and to aid in building LibTerep car support. This file may not be 100% correct and matching the original implementation, however it is a best effort document based on reverse engineering of the files.
 
@@ -128,11 +128,11 @@ This item is always a 3 point polygon which seems to affect the culling of wheel
 
 This item is variable length based on the amount of points defined in the polygon. The color items can be set independently, if they differ then the game dithers between the two colors for the polygon.
 
-| Offset    | Datatype | Description                                                           |
-| --------- | -------- | --------------------------------------------------------------------- |
-| 0         | `uint8`  | Count of points in the polygon                                        |
-| 1         | `uint16` | Double of the index of the point. These repeat by the amount of count |
-| 2*(count+1) | `uint8`  | Palette index value                                                   |
+| Offset        | Datatype | Description                                                           |
+| ------------- | -------- | --------------------------------------------------------------------- |
+| 0             | `uint8`  | Count of points in the polygon                                        |
+| 1             | `uint16` | Double of the index of the point. These repeat by the amount of count |
+| 2*(count+1)   | `uint8`  | Palette index value                                                   |
 | 2*(count+1)+2 | `uint8`  | Palette index value                                                   |
 
 Polygons seem to contain one more point than what would usually be defined. For rendered polygons this last point is usually a duplicate of the first point. Shadow polygons seem to have the index 0.

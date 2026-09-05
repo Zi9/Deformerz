@@ -13,10 +13,16 @@ static void _RecalculatePhysLinks(DFCar* dfcar)
         TerepCarPhysLink* p = &car->physLinks[j];
         p->len = Vector3Distance(ToVector3(p->pointA->pos), ToVector3(car->physLinks[j].pointB->pos));
         p->len2 = car->physLinks[j].len;
-        if (p->type == TEREP_PHYSLINK_SUSP_FRONT) {
+        if (p->type == TEREP_PHYSLINK_SUSP_FRONT10) {
             p->len_min = car->physLinks[j].len * 0.48;
             p->len_max = car->physLinks[j].len;
-        } else if (p->type == TEREP_PHYSLINK_SUSP_REAR) {
+        } else if (p->type == TEREP_PHYSLINK_SUSP_FRONT12) {
+            p->len_min = car->physLinks[j].len * 0.48;
+            p->len_max = car->physLinks[j].len;
+        } else if (p->type == TEREP_PHYSLINK_SUSP_REAR4) {
+            p->len_min = car->physLinks[j].len * 0.45;
+            p->len_max = car->physLinks[j].len;
+        } else if (p->type == TEREP_PHYSLINK_SUSP_REAR6) {
             p->len_min = car->physLinks[j].len * 0.45;
             p->len_max = car->physLinks[j].len;
         } else if (p->type == TEREP_PHYSLINK_SUSP_EXTRA) {
