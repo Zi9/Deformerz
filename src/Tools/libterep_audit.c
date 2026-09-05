@@ -49,32 +49,29 @@ static bool TestDATRebuild(const char* file, const char* outfile)
     return result;
 }
 
-static bool TestTextRebuild(const char* file)
+static bool TestTextRebuild(const char* file, const char* outfile)
 {
-    char validation_file[128];
     char validation_text[128];
-    snprintf(validation_file, 128, "%s.validation", file);
-    snprintf(validation_text, 128, "%s.validation.txt", file);
+    snprintf(validation_text, 128, "%s.validation.txt", outfile);
     TerepCar* car = TerepCar_Load(file, NULL);
     TerepCar_WriteText(car, validation_text);
     TerepCar_Unload(car);
 
     car = TerepCar_LoadText(validation_text);
-    TerepCar_Write(car, validation_file, NULL);
+    TerepCar_Write(car, outfile, NULL);
     TerepCar_Unload(car);
-
-    bool result = Validate(file, validation_file);
-
-    remove(validation_file);
     remove(validation_text);
+
+    bool result = Validate(file, outfile);
+
     return result;
 }
 
 int main()
 {
-    TestDATRebuild("./data/car1.dat", "./data/testenv/car1.dat");
-    TestDATRebuild("./data/car2.dat", "./data/testenv/car2.dat");
-    TestDATRebuild("./data/car3.dat", "./data/testenv/car3.dat");
-    TestDATRebuild("./data/car4.dat", "./data/testenv/car4.dat");
-    TestDATRebuild("./data/car5.dat", "./data/testenv/car5.dat");
+    TestTextRebuild("./data/car1.dat", "./data/testenv/car1.dat");
+    TestTextRebuild("./data/car2.dat", "./data/testenv/car2.dat");
+    TestTextRebuild("./data/car3.dat", "./data/testenv/car3.dat");
+    TestTextRebuild("./data/car4.dat", "./data/testenv/car4.dat");
+    TestTextRebuild("./data/car5.dat", "./data/testenv/car5.dat");
 }

@@ -120,12 +120,14 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
             int p1 = 0;
             int p2 = 0;
             int p3 = 0;
-            sscanf(_tmp, "  COLOR_POLYGON | Points: (3) %i, %i, %i, %i | Colors: %hhu, %hhu", &p0, &p1, &p2, &p3,
-                   &p->polygon->colors[0], &p->polygon->colors[1]);
+            int gp = 0;
+            sscanf(_tmp, "  COLOR_POLYGON | Points: (3) %i, %i, %i, %i | Colors: %hhu, %hhu | GroundProject: %d", &p0, &p1, &p2, &p3,
+                   &p->polygon->colors[0], &p->polygon->colors[1], &gp);
             p->polygon->vertices[0] = &car->points[p0];
             p->polygon->vertices[1] = &car->points[p1];
             p->polygon->vertices[2] = &car->points[p2];
             p->polygon->closed = p3 == 0 ? false : true;
+            p->polygon->isProjectedOnGround = gp;
         } else if (STARTSWITH("  COLOR_POLYGON | Points: (4)")) {
             p->type = TEREP_RENDERDATA_COLOR_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
@@ -135,13 +137,15 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
             int p2 = 0;
             int p3 = 0;
             int p4 = 0;
-            sscanf(_tmp, "  COLOR_POLYGON | Points: (4) %i, %i, %i, %i, %i | Colors: %hhu, %hhu", &p0, &p1, &p2, &p3,
-                   &p4, &p->polygon->colors[0], &p->polygon->colors[1]);
+            int gp = 0;
+            sscanf(_tmp, "  COLOR_POLYGON | Points: (4) %i, %i, %i, %i, %i | Colors: %hhu, %hhu | GroundProject: %d", &p0, &p1, &p2, &p3,
+                   &p4, &p->polygon->colors[0], &p->polygon->colors[1], &gp);
             p->polygon->vertices[0] = &car->points[p0];
             p->polygon->vertices[1] = &car->points[p1];
             p->polygon->vertices[2] = &car->points[p2];
             p->polygon->vertices[3] = &car->points[p3];
             p->polygon->closed = p4 == 0 ? false : true;
+            p->polygon->isProjectedOnGround = gp;
         } else if (STARTSWITH("  COLOR_POLYGON | Points: (5)")) {
             p->type = TEREP_RENDERDATA_COLOR_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
@@ -152,14 +156,16 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
             int p3 = 0;
             int p4 = 0;
             int p5 = 0;
-            sscanf(_tmp, "  COLOR_POLYGON | Points: (5) %i, %i, %i, %i, %i, %i | Colors: %hhu, %hhu", &p0, &p1, &p2,
-                   &p3, &p4, &p5, &p->polygon->colors[0], &p->polygon->colors[1]);
+            int gp = 0;
+            sscanf(_tmp, "  COLOR_POLYGON | Points: (5) %i, %i, %i, %i, %i, %i | Colors: %hhu, %hhu | GroundProject: %d", &p0, &p1, &p2,
+                   &p3, &p4, &p5, &p->polygon->colors[0], &p->polygon->colors[1], &gp);
             p->polygon->vertices[0] = &car->points[p0];
             p->polygon->vertices[1] = &car->points[p1];
             p->polygon->vertices[2] = &car->points[p2];
             p->polygon->vertices[3] = &car->points[p3];
             p->polygon->vertices[4] = &car->points[p4];
             p->polygon->closed = p5 == 0 ? false : true;
+            p->polygon->isProjectedOnGround = gp;
         } else if (STARTSWITH("  TEXTURE_POLYGON | Points: (3)")) {
             p->type = TEREP_RENDERDATA_TEXTURE_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
@@ -168,13 +174,16 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
             int p1 = 0;
             int p2 = 0;
             int p3 = 0;
-            sscanf(_tmp, "  TEXTURE_POLYGON | Points: (3) %i (U:%f, V:%f), %i (U:%f, V:%f), %i (U:%f, V:%f), %i", &p0,
+            int gp = 0;
+            float unused = 0;
+            sscanf(_tmp, "  TEXTURE_POLYGON | Points: (3) %i (U:%f, V:%f), %i (U:%f, V:%f), %i (U:%f, V:%f), %i (U:%f, V:%f) | GroundProject: %d", &p0,
                    &p->polygon->uv[0].x, &p->polygon->uv[0].y, &p1, &p->polygon->uv[1].x, &p->polygon->uv[1].y, &p2,
-                   &p->polygon->uv[2].x, &p->polygon->uv[2].y, &p3);
+                   &p->polygon->uv[2].x, &p->polygon->uv[2].y, &p3, &unused, &unused, &gp);
             p->polygon->vertices[0] = &car->points[p0];
             p->polygon->vertices[1] = &car->points[p1];
             p->polygon->vertices[2] = &car->points[p2];
             p->polygon->closed = p3 == 0 ? false : true;
+            p->polygon->isProjectedOnGround = gp;
         } else if (STARTSWITH("  TEXTURE_POLYGON | Points: (4)")) {
             p->type = TEREP_RENDERDATA_TEXTURE_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
@@ -184,17 +193,20 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
             int p2 = 0;
             int p3 = 0;
             int p4 = 0;
+            int gp = 0;
+            float unused = 0;
             sscanf(_tmp,
                    "  TEXTURE_POLYGON | Points: (4) %i (U:%f, V:%f), %i (U:%f, V:%f), %i (U:%f, V:%f), %i (U:%f, "
-                   "V:%f), %i",
+                   "V:%f), %i (U:%f, V:%f) | GroundProject: %d",
                    &p0, &p->polygon->uv[0].x, &p->polygon->uv[0].y, &p1, &p->polygon->uv[1].x, &p->polygon->uv[1].y,
                    &p2, &p->polygon->uv[2].x, &p->polygon->uv[2].y, &p3, &p->polygon->uv[3].x, &p->polygon->uv[3].y,
-                   &p4);
+                   &p4, &unused, &unused, &gp);
             p->polygon->vertices[0] = &car->points[p0];
             p->polygon->vertices[1] = &car->points[p1];
             p->polygon->vertices[2] = &car->points[p2];
             p->polygon->vertices[3] = &car->points[p3];
             p->polygon->closed = p4 == 0 ? false : true;
+            p->polygon->isProjectedOnGround = gp;
         } else if (STARTSWITH("  TEXTURE_POLYGON | Points: (5)")) {
             p->type = TEREP_RENDERDATA_TEXTURE_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
@@ -205,18 +217,21 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
             int p3 = 0;
             int p4 = 0;
             int p5 = 0;
+            int gp = 0;
+            float unused = 0;
             sscanf(_tmp,
                    "  TEXTURE_POLYGON | Points: (5) %i (U:%f, V:%f), %i (U:%f, V:%f), %i (U:%f, V:%f), %i (U:%f, "
-                   "V:%f), %i (U:%f, V:%f), %i",
+                   "V:%f), %i (U:%f, V:%f), %i (U:%f, V:%f) | GroundProject: %d",
                    &p0, &p->polygon->uv[0].x, &p->polygon->uv[0].y, &p1, &p->polygon->uv[1].x, &p->polygon->uv[1].y,
                    &p2, &p->polygon->uv[2].x, &p->polygon->uv[2].y, &p3, &p->polygon->uv[3].x, &p->polygon->uv[3].y,
-                   &p4, &p->polygon->uv[4].x, &p->polygon->uv[4].y, &p5);
+                   &p4, &p->polygon->uv[4].x, &p->polygon->uv[4].y, &p5, &unused, &unused, &gp);
             p->polygon->vertices[0] = &car->points[p0];
             p->polygon->vertices[1] = &car->points[p1];
             p->polygon->vertices[2] = &car->points[p2];
             p->polygon->vertices[3] = &car->points[p3];
             p->polygon->vertices[4] = &car->points[p4];
             p->polygon->closed = p5 == 0 ? false : true;
+            p->polygon->isProjectedOnGround = gp;
         } else if (STARTSWITH("  WHEELDATA")) {
             p->type = TEREP_RENDERDATA_WHEEL;
             p->wheel = calloc(1, sizeof(TerepCarWheelData));

@@ -70,7 +70,7 @@ static void _WriteChunk3(TerepCar* car, FILE* f)
             } else {
                 fprintf(f, ", 0 | ");
             }
-            fprintf(f, "Colors: %i, %i\n", polygon->colors[0], polygon->colors[1]);
+            fprintf(f, "Colors: %i, %i | GroundProject: %d\n", polygon->colors[0], polygon->colors[1], polygon->isProjectedOnGround);
             break;
         }
         case TEREP_RENDERDATA_TEXTURE_POLYGON: {
@@ -80,9 +80,9 @@ static void _WriteChunk3(TerepCar* car, FILE* f)
                 fprintf(f, "%i (U:%.9f, V:%.9f), ", polygon->vertices[i]->index, polygon->uv[i].x, polygon->uv[i].y);
             }
             if (polygon->closed) {
-                fprintf(f, "%i (U:%.9f, V:%.9f)\n", polygon->vertices[0]->index, polygon->uv[0].x, polygon->uv[0].y);
+                fprintf(f, "%i (U:%.9f, V:%.9f) | GroundProject: %d\n", polygon->vertices[0]->index, polygon->uv[0].x, polygon->uv[0].y, polygon->isProjectedOnGround);
             } else {
-                fprintf(f, "%i (U:%.9f, V:%.9f)\n", 0, 0.0, 0.0);
+                fprintf(f, "%i (U:%.9f, V:%.9f) | GroundProject: %d\n", 0, 0.0, 0.0, polygon->isProjectedOnGround);
             }
             break;
         }
@@ -112,7 +112,7 @@ void TerepCar_WriteText(TerepCar* car, const char* cartext)
 {
     FILE* f = fopen(cartext, "w");
     fprintf(f, "# Converted using LibTerep\n");
-    fprintf(f, "# Dump Version: 1\n");
+    fprintf(f, "# Dump Version: 2\n");
     fprintf(f, "HEADER_START:\n");
     fprintf(f, "  Unknown1: %i\n", car->unknownHeaderValue1);
     fprintf(f, "  EngineSound: %i\n", car->engineSound);
