@@ -2,6 +2,7 @@
 
 #include "LibTerep/PCX.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef LIBTEREP_INTERNAL
 

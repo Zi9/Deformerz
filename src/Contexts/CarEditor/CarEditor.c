@@ -8,7 +8,7 @@ static CarEditorMode _mode = {0};
 static CarEditorMode _nextMode = {0};
 static bool _hasNextMode = false;
 static DFCar* _car;
-static Color _bg3d = (Color){40, 40, 40, 255};
+static Color _bg3d = {40, 40, 40, 255};
 
 static bool _quadView = false;
 
@@ -134,7 +134,7 @@ static void _Run()
     rlImGuiBegin();
     igSetNextWindowPos((ImVec2){0, 0}, ImGuiCond_Once, (ImVec2){0});
     igSetNextWindowSize((ImVec2){640, GetScreenHeight()}, ImGuiCond_Once);
-    igBegin("Deformerz Car Editor", nullptr,
+    igBegin("Deformerz Car Editor", NULL,
             ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
     _mode.RenderUI(_car);
     igEnd();
