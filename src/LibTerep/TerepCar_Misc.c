@@ -1,8 +1,10 @@
 #define LIBTEREP_INTERNAL
 #include "TerepCar.h"
+#include "LibTerep.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 const char* TerepCar_Point2String(TerepCarPoint* point)
 {
@@ -15,12 +17,14 @@ const char* TerepCar_Point2String(TerepCarPoint* point)
         return "WHEEL_F";
     case TEREP_POINT_WHEEL_REAR:
         return "WHEEL_R";
+    default:
+        assert(0 && "Unknown point type");
     }
 }
 
-const char* TerepCar_PhysLink2String(TerepCarPhysLink* seg)
+const char* TerepCar_PhysLink2String(TerepCarPhysLink* link)
 {
-    switch (seg->type) {
+    switch (link->type) {
     case TEREP_PHYSLINK_NORMAL:
         return "NORMAL";
     case TEREP_PHYSLINK_SUSP_EXTRA:
@@ -33,6 +37,8 @@ const char* TerepCar_PhysLink2String(TerepCarPhysLink* seg)
         return "FRONT10";
     case TEREP_PHYSLINK_SUSP_FRONT12:
         return "FRONT12";
+    default:
+        assert(0 && "Unknown link type");
     }
 }
 
@@ -51,36 +57,40 @@ const char* TerepCar_RenderType2String(TerepCarRenderDataItem* item)
         return "TEXTURE_POLYGON";
     case TEREP_RENDERDATA_WHEEL:
         return "WHEELDATA";
+    default:
+        assert(0 && "Unknown render type");
     }
 }
 
 void TerepCar_Unload(TerepCar* car)
 {
-    printf("LibTerep | INFO: Unloading car...");
-    for (int i = 0; i < car->renderDataCount; i++) {
-        switch (car->renderData[i].type) {
-        case TEREP_RENDERDATA_NULL:
-            break;
-        case TEREP_RENDERDATA_CAMERA:
-            free(car->renderData[i].camera);
-            break;
-        case TEREP_RENDERDATA_UNK3_POLYGON:
-        case TEREP_RENDERDATA_COLOR_POLYGON:
-        case TEREP_RENDERDATA_TEXTURE_POLYGON:
-            free(car->renderData[i].polygon);
-            break;
-        case TEREP_RENDERDATA_WHEEL:
-            free(car->renderData[i].wheel);
-            break;
+    LTINFO("Unloading car...");
+    if (car) {
+        for (int i = 0; i < car->renderDataCount; i++) {
+            switch (car->renderData[i].type) {
+            case TEREP_RENDERDATA_NULL:
+                break;
+            case TEREP_RENDERDATA_CAMERA:
+                free(car->renderData[i].camera);
+                break;
+            case TEREP_RENDERDATA_UNK3_POLYGON:
+            case TEREP_RENDERDATA_COLOR_POLYGON:
+            case TEREP_RENDERDATA_TEXTURE_POLYGON:
+                free(car->renderData[i].polygon);
+                break;
+            case TEREP_RENDERDATA_WHEEL:
+                free(car->renderData[i].wheel);
+                break;
+            }
         }
+        free(car->renderData);
+        free(car->points);
+        free(car->physLinks);
+        if (car->carTexture != 0) {
+            free(car->carTexture->data);
+            free(car->carTexture);
+        }
+        free(car);
     }
-    free(car->renderData);
-    free(car->points);
-    free(car->physLinks);
-    if (car->carTexture != 0) {
-        free(car->carTexture->data);
-        free(car->carTexture);
-    }
-    free(car);
     printf("OK!\n");
 }

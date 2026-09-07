@@ -35,9 +35,17 @@ int main(int argc, const char* argv[])
 
     printf("dat2text | INFO: Converting %s to %s via LibTerep...\n", argv[1], argv[2]);
     TerepCar* car = TerepCar_Load(argv[1], 0);
-    TerepCar_WriteText(car, argv[2]);
-    TerepCar_Unload(car);
-    printf("dat2text | INFO: Conversion completed!\n");
+    if (!car) {
+        printf("dat2text | ERROR: Failed to load %s\n", argv[1]);
+        return 1;
+    }
+    bool ok = TerepCar_WriteText(car, argv[2]);
+    if (!ok) {
+        printf("dat2text | ERROR: Failed to write %s\n", argv[2]);
+    } else {
+        printf("dat2text | INFO: Successfully converted %s to %s\n", argv[1], argv[2]);
+    }
 
+    TerepCar_Unload(car);
     return 0;
 }
