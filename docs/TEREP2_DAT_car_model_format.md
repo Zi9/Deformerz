@@ -103,6 +103,9 @@ These are always 1 byte unlike all other definition types.
 
 Following tables list the structure of each entry. Each items definition starts after the ID byte.
 
+> [!NOTE]
+> The point index values are doubled in value. This is for using the least significant bit for a flag in some cases
+
 ##### Camera Property Item (ID 1 - 0x01)
 
 This item is always 4 bytes.
@@ -136,6 +139,8 @@ This item is variable length based on the amount of points defined in the polygo
 | 2*(count+1)+2 | `uint8`  | Palette index value                                                   |
 
 Polygons seem to contain one more point than what would usually be defined. For rendered polygons this last point is usually a duplicate of the first point. Shadow polygons seem to have the index 0.
+
+The LSB flag seems to flag if a polygon should be rendered normally or projected onto the ground (shadows).
 
 The color also has some special colors which may get rendered transparently or not visible at all. Color 240 (0xF0) appears to be invisible. Colors originate from the "Master palette" which gets loaded from `COL.PCX`.
 
