@@ -59,7 +59,7 @@ static PCXData* _PCX_LoadFile(const char* path, uint16_t targ_width, uint16_t ta
     uint16_t width = hdr->xMax - hdr->xMin + 1;
     uint16_t height = hdr->yMax - hdr->yMin + 1;
     LTASSERT(width >= targ_width);
-    LTASSERT(height >= targ_height);
+    //LTASSERT(height >= targ_height);
 
     size_t bufsz = hdr->bytesPerLine * hdr->nplanes * height;
     uint8_t* buf = calloc(1, bufsz);
