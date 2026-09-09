@@ -1,7 +1,7 @@
 #include "TerepMap.h"
 #include "PCX.h"
+#include "LibTerep.h"
 
-#include <assert.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -19,14 +19,15 @@ static TerepMap* currentMap;
 
 static void _BuildMapModel(TerepMap* map)
 {
+    LTASSERT(map);
     // TODO: Make sure triangle orientation matches terep2
     map->triangleCount = (TEREP_MAPSZ - 1) * (TEREP_MAPSZ - 1) * 2;
     map->vertexCount = map->triangleCount * 3;
 
     float* vertices = calloc(1, (sizeof *vertices) * map->vertexCount * 3);
-    assert(vertices);
+    LTASSERT(vertices);
     float* uvs = calloc(1, (sizeof *uvs) * map->vertexCount * 2);
-    assert(uvs);
+    LTASSERT(uvs);
 
     size_t vertC = 0;
     size_t uvC = 0;
@@ -93,17 +94,23 @@ static void _BuildMapModel(TerepMap* map)
 TerepMap* TerepMap_Load(const char* colpcx, const char* mappcx, const char* maptexpcx)
 {
     TerepMap* map = calloc(1, sizeof *map);
-    assert(map);
+    LTASSERT(map);
     currentMap = map;
     map->colormap = PCX_LoadArray(colpcx);
+    LTASSERT(map->colormap);
     map->heightmap = PCX_LoadArray(mappcx);
+    LTASSERT(map->heightmap);
     map->texturemap = PCX_LoadImage(maptexpcx);
+    LTASSERT(map->texturemap);
 
     _BuildMapModel(map);
     return map;
 }
 void TerepMap_Unload(TerepMap* map)
 {
+    if (!map) {
+        return;
+    }
     free(map->colormap->data);
     free(map->heightmap->data);
     free(map->texturemap->data);

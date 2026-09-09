@@ -7,6 +7,8 @@
 
 static void _WriteChunk1(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     fprintf(f, "POINTS_START:\n");
     for (size_t i = 0; i < car->pointCount; i++) {
         TerepCarPoint pt = car->points[i];
@@ -18,6 +20,8 @@ static void _WriteChunk1(TerepCar* car, FILE* f)
 }
 static void _WriteChunk2(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     fprintf(f, "PHYSLINKS_START:\n");
     for (size_t i = 0; i < car->physLinkCount; i++) {
         TerepCarPhysLink pl = car->physLinks[i];
@@ -29,6 +33,8 @@ static void _WriteChunk2(TerepCar* car, FILE* f)
 }
 static void _WriteChunk3(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     fprintf(f, "RENDER_DATA_START:\n");
     for (int i = 0; i < car->renderDataCount; i++) {
         fprintf(f, "  %s | ", TerepCar_RenderType2String(&car->renderData[i]));
@@ -109,17 +115,11 @@ static void _WriteChunk3(TerepCar* car, FILE* f)
     LTINFO("Converted %i render data items to text\n", car->renderDataCount);
 }
 
-bool TerepCar_WriteText(TerepCar* car, const char* cartext)
+void TerepCar_WriteText(TerepCar* car, const char* cartext)
 {
-    if (!car) {
-        LTERROR("Car is NULL!\n");
-        return false;
-    }
+    LTASSERT(car);
     FILE* f = fopen(cartext, "w");
-    if (!f) {
-        LTERROR("Failed to open %s for writing!\n", cartext);
-        return false;
-    }
+    LTASSERT(f);
     fprintf(f, "# Converted using LibTerep\n");
     fprintf(f, "# Dump Version: 2\n");
     fprintf(f, "HEADER_START:\n");
@@ -132,5 +132,4 @@ bool TerepCar_WriteText(TerepCar* car, const char* cartext)
 
     fclose(f);
     LTINFO("Finished writing %s!\n", cartext);
-    return true;
 }

@@ -1,6 +1,6 @@
 #include "PCX.h"
+#include "LibTerep.h"
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,40 +42,36 @@ struct RGBColor PCX_GLOBAL_PALETTE[256] = {0};
 
 static PCXData* _PCX_LoadFile(const char* path, uint16_t targ_width, uint16_t targ_height)
 {
+    size_t nread;
     PCXData* pcx = calloc(1, sizeof(PCXData));
-    assert(pcx);
+    LTASSERT(pcx);
     FILE* fp = fopen(path, "rb");
-    if (fp == NULL) {
-        printf("Unable to open PCX image %s for reading\n", path);
-        return NULL;
-    }
+    LTASSERT(fp);
     struct PCXHeader* hdr = calloc(1, PCX_HEADER_SIZE);
-    assert(fread(hdr, PCX_HEADER_SIZE, 1, fp) == 1);
-    if (hdr->identifier != 0x0A) {
-        fclose(fp);
-        free(hdr);
-        printf("%s is not a valid pcx file\n", path);
-        return NULL;
-    }
-
-    assert(hdr->encoding == 1);
-    assert(hdr->bitsPerPixel == 8);
-    assert(hdr->nplanes == 1);
+    LTASSERT(hdr);
+    nread = fread(hdr, 1, PCX_HEADER_SIZE, fp);
+    LTASSERT(nread == PCX_HEADER_SIZE);
+    LTASSERT(hdr->identifier == 0x0A);
+    LTASSERT(hdr->encoding == 1);
+    LTASSERT(hdr->bitsPerPixel == 8);
+    LTASSERT(hdr->nplanes == 1);
 
     uint16_t width = hdr->xMax - hdr->xMin + 1;
     uint16_t height = hdr->yMax - hdr->yMin + 1;
-    assert(width >= 256);
+    LTASSERT(width >= targ_width);
+    LTASSERT(height >= targ_height);
 
     size_t bufsz = hdr->bytesPerLine * hdr->nplanes * height;
     uint8_t* buf = calloc(1, bufsz);
-    assert(buf);
+    LTASSERT(buf);
     uint8_t in, repe;
     for (size_t bufi = 0; bufi < bufsz;) {
         if (fread(&in, sizeof(in), 1, fp) == 0)
             break;
         if ((0xC0 & in) == 0xC0) {
             repe = 0x3F & in;
-            assert(fread(&in, sizeof(in), 1, fp) != 0);
+            nread = fread(&in, sizeof(in), 1, fp);
+            LTASSERT(nread != 0);
             memset(buf + bufi, in, repe);
             bufi += repe;
         } else {
@@ -86,7 +82,7 @@ static PCXData* _PCX_LoadFile(const char* path, uint16_t targ_width, uint16_t ta
     free(hdr);
 
     pcx->data = calloc(1, targ_width * targ_height * sizeof *pcx->data);
-    assert(pcx->data);
+    LTASSERT(pcx->data);
     if (height >= targ_height) {
         for (size_t y = 0; y < targ_height; y++) {
             memcpy(pcx->data + (y * targ_height), buf + (y * width), targ_width * sizeof(uint8_t));
@@ -101,10 +97,12 @@ static PCXData* _PCX_LoadFile(const char* path, uint16_t targ_width, uint16_t ta
     }
     free(buf);
 
-    uint8_t palmagic;
-    fread(&palmagic, sizeof(palmagic), 1, fp);
-    assert(palmagic == 12);
-    assert(fread(&pcx->palette, PCX_PALETTE_SIZE, 1, fp) == 1);
+    uint8_t palmagic = 0;
+    nread = fread(&palmagic, sizeof(palmagic), 1, fp);
+    LTASSERT(nread == 1);
+    LTASSERT(palmagic == 12);
+    nread = fread(&pcx->palette, 1, PCX_PALETTE_SIZE, fp);
+    LTASSERT(nread == PCX_PALETTE_SIZE);
 
     fclose(fp);
 
@@ -115,11 +113,14 @@ PCXData* PCX_LoadArray(const char* path) { return _PCX_LoadFile(path, PCX_DEFAUL
 PCXImage* PCX_LoadImage(const char* path)
 {
     PCXData* pcx = _PCX_LoadFile(path, PCX_DEFAULT_SIZE, PCX_DEFAULT_SIZE);
+    LTASSERT(pcx);
+    LTASSERT(pcx->palette);
+    LTASSERT(pcx->data);
     PCXImage* img = calloc(1, sizeof(PCXImage));
-    assert(img);
+    LTASSERT(img);
     memcpy(img->palette, pcx->palette, PCX_PALETTE_SIZE);
     struct RGBAColor* pix = calloc(1, PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE * sizeof *pix);
-    assert(pix);
+    LTASSERT(pix);
     if (USE_GLOBAL_PALETTE_FOR_LOADING) {
         for (size_t i = 0; i < PCX_DEFAULT_SIZE * PCX_DEFAULT_SIZE; i++) {
             pix[i].red = PCX_GLOBAL_PALETTE[pcx->data[i]].red;
@@ -153,14 +154,19 @@ PCXImage* PCX_LoadImage(const char* path)
 
 void PCX_EnableGlobalPalette(const char* path)
 {
-    FILE* fp = fopen(path, "rb");
-    assert(fp);
+    int rc;
+    FILE* f = fopen(path, "rb");
+    LTASSERT(f);
     // Something funky here but it works so...
-    assert(fseek(fp, 0, SEEK_END) == 0);
-    unsigned long end = ftell(fp);
-    assert(fseek(fp, end - PCX_PALETTE_SIZE, SEEK_SET) == 0);
-    assert(fread(&PCX_GLOBAL_PALETTE, sizeof(PCX_GLOBAL_PALETTE), 1, fp) == 1);
-    fclose(fp);
+    rc = fseek(f, 0, SEEK_END);
+    LTASSERT(rc == 0);
+    unsigned long end = ftell(f);
+    LTASSERT(end > PCX_PALETTE_SIZE);
+    rc = fseek(f, end - PCX_PALETTE_SIZE, SEEK_SET);
+    LTASSERT(rc == 0);
+    size_t nread = fread(&PCX_GLOBAL_PALETTE, 1, sizeof(PCX_GLOBAL_PALETTE), f);
+    LTASSERT(nread == sizeof(PCX_GLOBAL_PALETTE));
+    fclose(f);
     USE_GLOBAL_PALETTE_FOR_LOADING = true;
 }
 void PCX_DisableGlobalPalette() { USE_GLOBAL_PALETTE_FOR_LOADING = false; }

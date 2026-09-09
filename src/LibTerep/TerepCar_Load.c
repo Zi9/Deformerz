@@ -2,20 +2,15 @@
 #include "TerepCar.h"
 #include "LibTerep.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
-static bool _ParseChunk1(TerepCar* car, TerepDat* dat)
+static void _ParseChunk1(TerepCar* car, TerepDat* dat)
 {
     dat->cur = dat->data + U16(dat->data, 0);
     car->pointCount = U16(dat->cur, 0);
     car->points = calloc(car->pointCount, sizeof(TerepCarPoint));
-    if (!car->points) {
-        LTERROR("Failed to allocate memory for points\n");
-        return false;
-    }
+    LTASSERT(car->points);
     dat->cur += 2;
     for (size_t i = 0; i < car->pointCount; i++) {
         car->points[i].index = i;
@@ -30,23 +25,18 @@ static bool _ParseChunk1(TerepCar* car, TerepDat* dat)
         car->points[i].type = I16(dat->cur, 26);
         if (car->points[i].type > 2 && car->points[i].type != 65535) {
             LTERROR("Failure parsing %s -- Unknown type point: %i\n", dat->name, car->points[i].type);
-            return false;
         }
         dat->cur += 28;
     }
     LTINFO("Loaded %d points\n", car->pointCount);
-    return true;
 }
 
-static bool _ParseChunk2(TerepCar* car, TerepDat* dat)
+static void _ParseChunk2(TerepCar* car, TerepDat* dat)
 {
     dat->cur = dat->data + U16(dat->data, 2);
     car->physLinkCount = U16(dat->cur, 0);
     car->physLinks = calloc(car->physLinkCount, sizeof(TerepCarPhysLink));
-    if (!car->points) {
-        LTERROR("Failed to allocate memory for links\n");
-        return false;
-    }
+    LTASSERT(car->physLinks);
     dat->cur += 2;
     for (size_t i = 0; i < car->physLinkCount; i++) {
         car->physLinks[i].pointA = &car->points[U16(dat->cur, 0)];
@@ -58,29 +48,23 @@ static bool _ParseChunk2(TerepCar* car, TerepDat* dat)
         car->physLinks[i].len_max = U16(dat->cur, 12) / PHYS_LINK_SCALE;
         if (car->physLinks[i].type != 0 && car->physLinks[i].type != 1 && car->physLinks[i].type != 4 &&
             car->physLinks[i].type != 6 && car->physLinks[i].type != 10 && car->physLinks[i].type != 12) {
-            LTERROR("Failure parsing %s -- Unknown type physics link: %i\n", dat->name,
-                   car->physLinks[i].type);
-            return false;
+            LTERROR("Failure parsing %s -- Unknown type physics link: %i\n", dat->name, car->physLinks[i].type);
         }
         if (car->physLinks[i].len != car->physLinks[i].len2) {
-            LTWARN("Physics link length values do not match, car may be unstable\n ");
+            LTWARN("Physics link length values do not match, car may be unstable\n");
         }
         dat->cur += 14;
     }
     LTINFO("Loaded %d physics links\n", car->physLinkCount);
-    return true;
 }
 
-static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
+static void _ParseChunk3(TerepCar* car, TerepDat* dat)
 {
     dat->cur = dat->data + U16(dat->data, 4);
     car->renderDataCount = 0;
     while (dat->cur < dat->data + dat->size) {
         car->renderData = realloc(car->renderData, (car->renderDataCount + 1) * sizeof(TerepCarRenderDataItem));
-        if (!car->renderData) {
-            LTERROR("Failed to allocate memory for render data\n");
-            return false;
-        }
+        LTASSERT(car->renderData);
         car->renderData[car->renderDataCount].type = U8(dat->cur, 0);
         dat->cur++;
         switch (car->renderData[car->renderDataCount].type) {
@@ -88,18 +72,11 @@ static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
             break;
         case TEREP_RENDERDATA_CAMERA: {
             TerepCarCameraData* cam = calloc(1, sizeof(TerepCarCameraData));
-            if (!cam) {
-                LTERROR("Failed to allocate memory for camera data\n");
-                return false;
-            }
             car->renderData[car->renderDataCount].camera = cam;
             cam->cameraPoint = &car->points[U16(dat->cur, 0) >> 1];
             if (cam->cameraPoint->type != TEREP_POINT_CAMERA) {
-                LTERROR("Failure parsing %s -- Chunk3 -> Camera point (id 0x1) index is not a camera "
-                       "point, "
-                       "read index %i\n",
-                       dat->name, cam->cameraPoint->index);
-                return false;
+                LTERROR("Failure parsing % s-- Chunk3->Camera point(id 0x1) index is not a camera "
+                        "point, read index %i\n", dat->name, cam->cameraPoint->index);
             }
             cam->unknown1 = U8(dat->cur, 2);
             cam->unknown2 = U8(dat->cur, 3);
@@ -109,10 +86,7 @@ static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
         case TEREP_RENDERDATA_UNK3_POLYGON: {
             // possibly some culling thing, changing these values seems to do render glitches
             TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
-            if (!polygon) {
-                LTERROR("Failed to allocate memory for polygon data\n");
-                return false;
-            }
+            LTASSERT(polygon);
             car->renderData[car->renderDataCount].polygon = polygon;
             polygon->vertexCount = 3;
             polygon->vertices[0] = &car->points[U16(dat->cur, 0) >> 1];
@@ -126,10 +100,7 @@ static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
         }
         case TEREP_RENDERDATA_COLOR_POLYGON: {
             TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
-            if (!polygon) {
-                LTERROR("Failed to allocate memory for polygon data\n");
-                return false;
-            }
+            LTASSERT(polygon);
             car->renderData[car->renderDataCount].polygon = polygon;
             polygon->vertexCount = U8(dat->cur, 0);
             dat->cur++;
@@ -137,8 +108,7 @@ static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
                 if (i == 0) {
                     polygon->isProjectedOnGround = (U16(dat->cur, 2 * i) & 1);
                 } else if (polygon->isProjectedOnGround != (U16(dat->cur, 2 * i) & 1)) {
-                    LTWARN("One of the polygons has inconsistent 'snap to ground' mapping, this is "
-                           "awful...\n");
+                    LTWARN("One of the polygons has inconsistent 'snap to ground' mapping, this is awful...\n");
                 }
                 polygon->vertices[i] = &car->points[U16(dat->cur, 2 * i) >> 1];
             }
@@ -150,10 +120,7 @@ static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
         }
         case TEREP_RENDERDATA_TEXTURE_POLYGON: {
             TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
-            if (!polygon) {
-                LTERROR("Failed to allocate memory for polygon data\n");
-                return false;
-            }
+            LTASSERT(polygon);
             car->renderData[car->renderDataCount].polygon = polygon;
             polygon->vertexCount = U8(dat->cur, 0);
             dat->cur++;
@@ -174,10 +141,7 @@ static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
         }
         case TEREP_RENDERDATA_WHEEL: {
             TerepCarWheelData* wheel = calloc(1, sizeof(TerepCarWheelData));
-            if (!wheel) {
-                LTERROR("Failed to allocate memory for wheel data\n");
-                return false;
-            }
+            LTASSERT(wheel);
             car->renderData[car->renderDataCount].wheel = wheel;
             wheel->wheelPoint = &car->points[U16(dat->cur, 0) >> 1];
             wheel->unknown1 = U16(dat->cur, 2);
@@ -196,65 +160,38 @@ static bool _ParseChunk3(TerepCar* car, TerepDat* dat)
             break;
         }
         default:
-            LTERROR("Failure parsing % s-- Chunk3->Unknown data block %d\n ", dat->name,
-                   car->renderData[car->renderDataCount].type);
-            return false;
+            LTERROR("Failure parsing %s -- Chunk3 -> Unknown data block %d\n", dat->name,
+                    car->renderData[car->renderDataCount].type);
         }
         car->renderDataCount++;
     }
-    LTINFO("Loaded %i render data items\n", car->renderDataCount);
-    return true;
+    LTINFO("Loaded % i render data items\n", car->renderDataCount);
 }
 
 TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)
 {
-    TerepCar* ret = NULL;
     TerepCar* car = calloc(1, sizeof *car);
-    if (!car) {
-        LTERROR("Failed to allocate memory for TerepCar\n");
-        return NULL;
-    }
-
+    LTASSERT(car);
     TerepDat* dat = _LoadDat(cardat);
-    if (!dat) {
-        goto CLEANERR;
-    }
+    LTASSERT(dat);
     // TODO: Attempt to detect the Terep1 dat format and load that too
 
     car->unknownHeaderValue1 = U16(dat->data, 6);
     car->engineSound = U16(dat->data, 8);
 
-    bool ok;
-    ok = _ParseChunk1(car, dat);
-    if (!ok) {
-        goto CLEANERR;
-    }
-    ok = _ParseChunk2(car, dat);
-    if (!ok) {
-        goto CLEANERR;
-    }
-    ok = _ParseChunk3(car, dat);
-    if (!ok) {
-        goto CLEANERR;
-    }
+    _ParseChunk1(car, dat);
+    _ParseChunk2(car, dat);
+    _ParseChunk3(car, dat);
     LTINFO("Finished loading %s (%zu bytes)\n", dat->name, dat->size);
 
     if (carpcx != NULL) {
         car->carTexture = PCX_LoadImage(carpcx);
-        if (!car->carTexture) {
-            goto CLEANERR;
-        }
+        LTASSERT(car->carTexture);
         LTINFO("Loaded car texture %s\n", carpcx);
     } else {
         LTINFO("No texture provided for loading\n");
     }
 
-    ret = car;
     _UnloadDat(dat);
-    return ret;
-
-CLEANERR:
-    _UnloadDat(dat);
-    free(car);
-    return NULL;
+    return car;
 }

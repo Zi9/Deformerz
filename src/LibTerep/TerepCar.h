@@ -130,7 +130,7 @@ typedef struct {
 TerepCar* TerepCar_Load(const char* cardat, const char* carpcx);
 TerepCar* TerepCar_LoadText(const char* cartext);
 void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx);
-bool TerepCar_WriteText(TerepCar* car, const char* cartext);
+void TerepCar_WriteText(TerepCar* car, const char* cartext);
 void TerepCar_Unload(TerepCar* car);
 
 const char* TerepCar_Point2String(TerepCarPoint* point);

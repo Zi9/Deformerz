@@ -1,5 +1,6 @@
 #define LIBTEREP_INTERNAL
 #include "TerepCar.h"
+#include "LibTerep.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -7,6 +8,8 @@
 
 static void _WriteChunk1(TerepCar* car, TerepDat* dat)
 {
+    LTASSERT(car);
+    LTASSERT(dat);
     I16(dat->data, 0) = dat->cur - dat->data;
     U16(dat->cur, 0) = car->pointCount;
     dat->cur += 2;
@@ -21,10 +24,12 @@ static void _WriteChunk1(TerepCar* car, TerepDat* dat)
         I16(dat->cur, 26) = car->points[i].type;
         dat->cur += 28;
     }
-    printf("LibTerep | INFO: Built %d points for %s\n", car->pointCount, dat->name);
+    LTINFO("Built %d points for %s\n", car->pointCount, dat->name);
 }
 static void _WriteChunk2(TerepCar* car, TerepDat* dat)
 {
+    LTASSERT(car);
+    LTASSERT(dat);
     I16(dat->data, 2) = dat->cur - dat->data;
     U16(dat->cur, 0) = car->physLinkCount;
     dat->cur += 2;
@@ -38,11 +43,13 @@ static void _WriteChunk2(TerepCar* car, TerepDat* dat)
         U16(dat->cur, 12) = round(car->physLinks[i].len_max * PHYS_LINK_SCALE);
         dat->cur += 14;
     }
-    printf("LibTerep | INFO: Built %d physics links for %s\n", car->physLinkCount, dat->name);
+    LTINFO("Built %d physics links for %s\n", car->physLinkCount, dat->name);
 }
 
 static void _WriteChunk3(TerepCar* car, TerepDat* dat)
 {
+    LTASSERT(car);
+    LTASSERT(dat);
     I16(dat->data, 4) = dat->cur - dat->data;
     for (int i = 0; i < car->renderDataCount; i++) {
         U8(dat->cur, 0) = car->renderData[i].type;
@@ -139,14 +146,16 @@ static void _WriteChunk3(TerepCar* car, TerepDat* dat)
         }
         }
     }
-    printf("LibTerep | INFO: Built %i render data items for %s\n", car->renderDataCount, dat->name);
+    LTINFO("Built %i render data items for %s\n", car->renderDataCount, dat->name);
 }
 void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx)
 {
+    LTASSERT(car);
     TerepDat* dat = _CreateDat();
-    strncpy(dat->name, cardat, 32);
+    LTASSERT(car);
+    strncpy(dat->name, cardat, sizeof(dat->name));
 
-    dat->cur = dat->data + 132;
+    dat->cur = dat->data + LT_DAT_HDR_SIZE;
     _WriteChunk1(car, dat);
     _WriteChunk2(car, dat);
     _WriteChunk3(car, dat);
@@ -154,10 +163,12 @@ void TerepCar_Write(TerepCar* car, const char* cardat, const char* carpcx)
     U16(dat->data, 8) = car->engineSound;
     dat->size = dat->cur - dat->data;
 
-    FILE* fp = fopen(cardat, "wb");
-    printf("LibTerep | INFO: Attempting to write %zu bytes to %s...\n", dat->size, dat->name);
-    fwrite(dat->data, dat->size, 1, fp);
-    fclose(fp);
-    printf("LibTerep | INFO: Finished writing %s!\n", dat->name);
+    FILE* f = fopen(cardat, "wb");
+    LTASSERT(f);
+    LTINFO("Attempting to write %zu bytes to %s...\n", dat->size, dat->name);
+    size_t nwritten = fwrite(dat->data, 1, dat->size, f);
+    LTASSERT(nwritten == dat->size);
+    fclose(f);
+    LTINFO("Finished writing %s!\n", dat->name);
     _UnloadDat(dat);
 }
