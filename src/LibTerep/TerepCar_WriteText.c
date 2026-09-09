@@ -1,11 +1,14 @@
 #define LIBTEREP_INTERNAL
 #include "TerepCar.h"
+#include "LibTerep.h"
 
 #include <stdio.h>
 #include <string.h>
 
 static void _WriteChunk1(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     fprintf(f, "POINTS_START:\n");
     for (size_t i = 0; i < car->pointCount; i++) {
         TerepCarPoint pt = car->points[i];
@@ -13,10 +16,12 @@ static void _WriteChunk1(TerepCar* car, FILE* f)
                 pt.pos[0], pt.pos[1], pt.pos[2], pt.size, pt.unknown[0], pt.unknown[1], pt.unknown[2]);
     }
     fprintf(f, "POINTS_END:\n");
-    printf("LibTerep | INFO: Converted %d points to text\n", car->pointCount);
+    LTINFO("Converted %d points to text\n", car->pointCount);
 }
 static void _WriteChunk2(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     fprintf(f, "PHYSLINKS_START:\n");
     for (size_t i = 0; i < car->physLinkCount; i++) {
         TerepCarPhysLink pl = car->physLinks[i];
@@ -24,10 +29,12 @@ static void _WriteChunk2(TerepCar* car, FILE* f)
                 pl.pointA->index, pl.pointB->index, pl.len, pl.len2, pl.len_min, pl.len_max);
     }
     fprintf(f, "PHYSLINKS_END:\n");
-    printf("LibTerep | INFO: Converted %d physics links to text\n", car->physLinkCount);
+    LTINFO("Converted %d physics links to text\n", car->physLinkCount);
 }
 static void _WriteChunk3(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     fprintf(f, "RENDER_DATA_START:\n");
     for (int i = 0; i < car->renderDataCount; i++) {
         fprintf(f, "  %s | ", TerepCar_RenderType2String(&car->renderData[i]));
@@ -105,12 +112,14 @@ static void _WriteChunk3(TerepCar* car, FILE* f)
         }
     }
     fprintf(f, "RENDER_DATA_END:\n");
-    printf("LibTerep | INFO: Converted %i render data items to text\n", car->renderDataCount);
+    LTINFO("Converted %i render data items to text\n", car->renderDataCount);
 }
 
 void TerepCar_WriteText(TerepCar* car, const char* cartext)
 {
+    LTASSERT(car);
     FILE* f = fopen(cartext, "w");
+    LTASSERT(f);
     fprintf(f, "# Converted using LibTerep\n");
     fprintf(f, "# Dump Version: 2\n");
     fprintf(f, "HEADER_START:\n");
@@ -122,5 +131,5 @@ void TerepCar_WriteText(TerepCar* car, const char* cartext)
     _WriteChunk3(car, f);
 
     fclose(f);
-    printf("LibTerep | INFO: Finished writing %s!\n", cartext);
+    LTINFO("Finished writing %s!\n", cartext);
 }

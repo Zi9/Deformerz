@@ -1,8 +1,8 @@
 #include <string.h>
 #define LIBTEREP_INTERNAL
 #include "TerepCar.h"
+#include "LibTerep.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,12 +12,15 @@ char _tmp[512];
 
 static void _ParseChunk1(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     while (fgets(_tmp, sizeof(_tmp), f) != NULL) {
         if (STARTSWITH("POINTS_END:")) {
-            printf("LibTerep | INFO: Loaded %d points from text\n", car->pointCount);
+            LTINFO("Loaded %d points from text\n", car->pointCount);
             return;
         }
         car->points = realloc(car->points, sizeof(TerepCarPoint) * (car->pointCount + 1));
+        LTASSERT(car->points);
         TerepCarPoint* p = &car->points[car->pointCount];
         if (STARTSWITH("  WHEEL_F")) {
             sscanf(_tmp, "  WHEEL_F @ %f, %f, %f | Size: %f | Unknowns: %hu, %hu, %hu", &p->pos[0], &p->pos[1],
@@ -43,12 +46,15 @@ static void _ParseChunk1(TerepCar* car, FILE* f)
 
 static void _ParseChunk2(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     while (fgets(_tmp, sizeof(_tmp), f) != NULL) {
         if (STARTSWITH("PHYSLINKS_END:")) {
-            printf("LibTerep | INFO: Loaded %d physics links from text\n", car->physLinkCount);
+            LTINFO("Loaded %d physics links from text\n", car->physLinkCount);
             return;
         }
         car->physLinks = realloc(car->physLinks, sizeof(TerepCarPhysLink) * (car->physLinkCount + 1));
+        LTASSERT(car->physLinks);
         TerepCarPhysLink* p = &car->physLinks[car->physLinkCount];
         int pointA = 0;
         int pointB = 0;
@@ -85,18 +91,22 @@ static void _ParseChunk2(TerepCar* car, FILE* f)
 
 static void _ParseChunk3(TerepCar* car, FILE* f)
 {
+    LTASSERT(car);
+    LTASSERT(f);
     while (fgets(_tmp, sizeof(_tmp), f) != NULL) {
         if (STARTSWITH("RENDER_DATA_END:")) {
-            printf("LibTerep | INFO: Loaded %d render data items from text\n", car->renderDataCount);
+            LTINFO("Loaded %d render data items from text\n", car->renderDataCount);
             return;
         }
         car->renderData = realloc(car->renderData, sizeof(TerepCarRenderDataItem) * (car->renderDataCount + 1));
+        LTASSERT(car->renderData);
         TerepCarRenderDataItem* p = &car->renderData[car->renderDataCount];
         if (STARTSWITH("  NULL")) {
             p->type = TEREP_RENDERDATA_NULL;
         } else if (STARTSWITH("  CAMERADATA")) {
             p->type = TEREP_RENDERDATA_CAMERA;
             p->camera = calloc(1, sizeof(TerepCarCameraData));
+            LTASSERT(p->camera);
             int camerapoint = 0;
             sscanf(_tmp, "  CAMERADATA | Camera Point: %i | Unknowns: %hhu, %hhu", &camerapoint, &p->camera->unknown1,
                    &p->camera->unknown2);
@@ -104,6 +114,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  UNK3_POLYGON")) {
             p->type = TEREP_RENDERDATA_UNK3_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
+            LTASSERT(p->polygon);
             int p0 = 0;
             int p1 = 0;
             int p2 = 0;
@@ -115,6 +126,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  COLOR_POLYGON | Points: (3)")) {
             p->type = TEREP_RENDERDATA_COLOR_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
+            LTASSERT(p->polygon);
             p->polygon->vertexCount = 3;
             int p0 = 0;
             int p1 = 0;
@@ -131,6 +143,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  COLOR_POLYGON | Points: (4)")) {
             p->type = TEREP_RENDERDATA_COLOR_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
+            LTASSERT(p->polygon);
             p->polygon->vertexCount = 4;
             int p0 = 0;
             int p1 = 0;
@@ -149,6 +162,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  COLOR_POLYGON | Points: (5)")) {
             p->type = TEREP_RENDERDATA_COLOR_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
+            LTASSERT(p->polygon);
             p->polygon->vertexCount = 5;
             int p0 = 0;
             int p1 = 0;
@@ -169,6 +183,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  TEXTURE_POLYGON | Points: (3)")) {
             p->type = TEREP_RENDERDATA_TEXTURE_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
+            LTASSERT(p->polygon);
             p->polygon->vertexCount = 3;
             int p0 = 0;
             int p1 = 0;
@@ -187,6 +202,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  TEXTURE_POLYGON | Points: (4)")) {
             p->type = TEREP_RENDERDATA_TEXTURE_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
+            LTASSERT(p->polygon);
             p->polygon->vertexCount = 4;
             int p0 = 0;
             int p1 = 0;
@@ -210,6 +226,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  TEXTURE_POLYGON | Points: (5)")) {
             p->type = TEREP_RENDERDATA_TEXTURE_POLYGON;
             p->polygon = calloc(1, sizeof(TerepCarPolygonData));
+            LTASSERT(p->polygon);
             p->polygon->vertexCount = 5;
             int p0 = 0;
             int p1 = 0;
@@ -235,6 +252,7 @@ static void _ParseChunk3(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  WHEELDATA")) {
             p->type = TEREP_RENDERDATA_WHEEL;
             p->wheel = calloc(1, sizeof(TerepCarWheelData));
+            LTASSERT(p->wheel);
             int p0 = 0;
             sscanf(_tmp, "  WHEELDATA | Point: %i | Unknowns: %hhu, %hhu", &p0, &p->camera->unknown1,
                    &p->camera->unknown2);
@@ -263,7 +281,7 @@ static void _ParseHeader(TerepCar* car, FILE* f)
         } else if (STARTSWITH("  EngineSound:")) {
             sscanf(_tmp, "  EngineSound: %hu", &car->engineSound);
         } else {
-            printf("Bad header value\n");
+            LTERROR("Bad header value\n");
         }
     }
 }
@@ -271,8 +289,9 @@ static void _ParseHeader(TerepCar* car, FILE* f)
 TerepCar* TerepCar_LoadText(const char* cartext)
 {
     TerepCar* car = calloc(1, sizeof *car);
-    assert(car);
+    LTASSERT(car);
     FILE* f = fopen(cartext, "r");
+    LTASSERT(f);
 
     while (fgets(_tmp, sizeof(_tmp), f) != NULL) {
         if (STARTSWITH("#")) {
@@ -288,7 +307,7 @@ TerepCar* TerepCar_LoadText(const char* cartext)
         }
     }
 
-    printf("LibTerep | INFO: Finished parsing text from %s\n", cartext);
+    LTINFO("Finished parsing text from %s\n", cartext);
 
     fclose(f);
     return car;

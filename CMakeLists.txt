@@ -16,10 +16,10 @@ else()
 endif()
 
 # 1st party sources
-file(GLOB_RECURSE SRC_DEFORMERZ_ENGINE src/Engine/*.c)
-file(GLOB_RECURSE SRC_DEFORMERZ_CONTEXTS src/Contexts/*.c)
-file(GLOB_RECURSE SRC_LIBTEREP src/LibTerep/*.c)
-file(GLOB SRC_TOOLS src/Tools/*.c)
+file(GLOB_RECURSE SRC_DEFORMERZ_ENGINE src/Engine/*.c src/Engine/*.h)
+file(GLOB_RECURSE SRC_DEFORMERZ_CONTEXTS src/Contexts/*.c src/Contexts/*.h)
+file(GLOB_RECURSE SRC_LIBTEREP src/LibTerep/*.c src/LibTerep/*.h)
+file(GLOB SRC_TOOLS src/Tools/*.c src/Tools/*.h)
 
 # 3rd party sources
 file(GLOB SRC_RLIMGUI vendor/rlImGui/*.cpp)

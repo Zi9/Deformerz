@@ -1,4 +1,6 @@
 #include "LibTerep/TerepCar.h"
+#include "LibTerep/LibTerep.h"
+
 #include <stdio.h>
 
 #ifndef WIN32
