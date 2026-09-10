@@ -1,4 +1,4 @@
-## Deformerz - A recreation of the Terep2 demo by Nagymathe Denes
+## Deformerz - A reimplementation and modification platform for the Terep2 demo by Nagymathe Denes
 
 This project aims to build a comprehensive toolkit for Terep2 using [raylib](https://www.raylib.com)
 
