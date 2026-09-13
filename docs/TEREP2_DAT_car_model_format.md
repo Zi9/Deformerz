@@ -33,7 +33,7 @@ In Terep2, the standard car data files always start with a 132 byte header. This
 
 ### The Point Definitions Chunk
 
-This chunk contains an array of 3D space points in XZY format. Some points are special and may also have a nonzero size. Each data point definition is a fixed size of 28 bytes.
+This chunk contains an array of 3D space points in XZY format. Some points are special and may also have a nonzero size. Each data point definition is a fixed size of 28 bytes. The chunk starts with a uint16 value which equals to the count of point definitions following it.
 
 #### Point Definition
 
@@ -61,7 +61,7 @@ The point contains 12 null bytes which appear to be padding or also used for run
 
 ### The Physics Link Definitions Chunk
 
-This chunk contains an array of physics link between 2 points definitions along with some physics data. Each definition is a fixed size of 14 bytes.
+This chunk contains an array of physics link between 2 points definitions along with some physics data. Each definition is a fixed size of 14 bytes. The chunk starts with a uint16 value which equals to the count of physics link definitions following it.
 
 #### Physics Link Definition
 
