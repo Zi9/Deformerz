@@ -1,4 +1,4 @@
-#include "EditorCam.h"
+#include "FreeCam.h"
 
 #include <math.h>
 #include <raylib.h>
@@ -8,7 +8,7 @@
 #define CAMERA_DEFAULT_SPEED 1.0
 #define CAMERA_SPEED_MOD_MULT 10
 
-static struct EditorCam {
+static struct FreeCam {
     float mouseSens, camSpeed;
     Vector2 view;
     bool freecamEnabled;
@@ -50,29 +50,29 @@ static void _RecalculateCamera()
     CAM.rlCam.target = Vector3Add(CAM.rlCam.position, CAM.forward);
 }
 
-void EditorCam_BeginRender() { BeginMode3D(CAM.rlCam); }
-void EditorCam_EndRender() { EndMode3D(); }
+void FreeCam_BeginRender() { BeginMode3D(CAM.rlCam); }
+void FreeCam_EndRender() { EndMode3D(); }
 
-void EditorCam_SetPos(Vector3 pos)
+void FreeCam_SetPos(Vector3 pos)
 {
     CAM.rlCam.position = pos;
     _RecalculateCamera();
 }
-void EditorCam_SetRot(Vector2 rot)
+void FreeCam_SetRot(Vector2 rot)
 {
     CAM.view = rot;
     _RecalculateCamera();
 }
-void EditorCam_SetPosRot(Vector3 pos, Vector2 rot)
+void FreeCam_SetPosRot(Vector3 pos, Vector2 rot)
 {
     CAM.rlCam.position = pos;
     CAM.view = rot;
     _RecalculateCamera();
 }
-Vector3 EditorCam_GetPos() { return CAM.rlCam.position; }
-Vector2 EditorCam_GetRot() { return CAM.view; }
+Vector3 FreeCam_GetPos() { return CAM.rlCam.position; }
+Vector2 FreeCam_GetRot() { return CAM.view; }
 
-void EditorCam_Update()
+void FreeCam_Update()
 {
     if (IsKeyPressed(KEY_F3)) {
         if (CAM.freecamEnabled)
@@ -131,4 +131,4 @@ void EditorCam_Update()
         _RecalculateCamera();
     }
 }
-Camera EditorCam_GetRLCamera() { return CAM.rlCam; }
+Camera FreeCam_GetRLCamera() { return CAM.rlCam; }

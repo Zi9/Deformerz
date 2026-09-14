@@ -136,3 +136,6 @@ void TerepCar_Unload(TerepCar* car);
 const char* TerepCar_Point2String(TerepCarPoint* point);
 const char* TerepCar_PhysLink2String(TerepCarPhysLink* seg);
 const char* TerepCar_RenderType2String(TerepCarRenderDataItem* item);
+
+void TerepCar_RecalculatePhysLink(TerepCarPhysLink* link);
+void TerepCar_RecalculateAllPhysLinks(TerepCar* car);

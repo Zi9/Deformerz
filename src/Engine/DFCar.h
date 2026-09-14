@@ -9,8 +9,10 @@ typedef struct {
     char name[128];
 } DFCar;
 
-DFCar* DFCar_Load();
+DFCar* DFCar_Load(const char* carname);
 void DFCar_Unload(DFCar* dfcar);
+
+void DFCar_Render(DFCar* dfcar);
 
 #define ToVector3(v)                                                                                                   \
     (Vector3) { v[0], v[1], v[2] }

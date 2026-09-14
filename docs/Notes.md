@@ -30,3 +30,8 @@ static void load_dat_chunk2_terep1(TerepCar* car, uint8_t* chunkStart)
     printf("INFO: CARLOAD: Loaded %d physics segments\n", car->physLinkCount);
 }
 ```
+
+
+# Rendering
+
+Horizontal resolution should be 1.2x scaled for 4:3

@@ -1,5 +1,6 @@
 #include "CarEditor.h"
 #include "EditorCam.h"
+#include "Engine/DFCar.h"
 #include "Engine/Engine.h"
 #include "Engine/UI.h"
 #include "raylib.h"
@@ -21,7 +22,7 @@ static RenderTexture _viewportQ4;
 static void _Enter()
 {
     _mode = CarEditorMode_Meta();
-    _car = DFCar_Load();
+    _car = DFCar_Load("car1");
     EditorCam_SetPosRot((Vector3){-0.75, 0.6, -0.75}, (Vector2){40, -30});
     _viewport = LoadRenderTexture(1280 / 2, 1080 / 2);
     _viewportQ1 = LoadRenderTexture(638, 538);
@@ -141,6 +142,12 @@ static void _Run()
     rlImGuiEnd();
 
     EndDrawing();
+}
+
+void CarEditor_LoadCar(const char* cardat)
+{
+    DFCar_Unload(_car);
+    _car = DFCar_Load(cardat);
 }
 
 Vector2 CarEditor_GetMousePosViewport()

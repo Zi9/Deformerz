@@ -11,6 +11,7 @@ typedef struct {
 } CarEditorMode;
 
 void CarEditor_SwitchMode(CarEditorMode mode);
+void CarEditor_LoadCar(const char* cardat);
 Vector2 CarEditor_GetMousePosViewport();
 
 CarEditorMode CarEditorMode_Meta();
@@ -20,8 +21,5 @@ CarEditorMode CarEditorMode_Polygons();
 CarEditorMode CarEditorMode_WheelData();
 CarEditorMode CarEditorMode_Renderables();
 CarEditorMode CarEditorMode_Unk3();
-CarEditorMode CarEditorMode_EditPoint(TerepCarPoint* point);
-CarEditorMode CarEditorMode_EditPhyslink(TerepCarPhysLink* link);
-CarEditorMode CarEditorMode_EditPolygon(TerepCarPolygonData* poly);
 
 EngineContext CarEditorContext();

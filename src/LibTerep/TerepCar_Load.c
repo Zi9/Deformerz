@@ -1,6 +1,6 @@
 #define LIBTEREP_INTERNAL
-#include "TerepCar.h"
 #include "LibTerep.h"
+#include "TerepCar.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,8 +75,9 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             car->renderData[car->renderDataCount].camera = cam;
             cam->cameraPoint = &car->points[U16(dat->cur, 0) >> 1];
             if (cam->cameraPoint->type != TEREP_POINT_CAMERA) {
-                LTERROR("Failure parsing % s-- Chunk3->Camera point(id 0x1) index is not a camera "
-                        "point, read index %i\n", dat->name, cam->cameraPoint->index);
+                LTERROR("Failure parsing %s-- Chunk3->Camera point(id 0x1) index is not a camera "
+                        "point, read index %i\n",
+                        dat->name, cam->cameraPoint->index);
             }
             cam->unknown1 = U8(dat->cur, 2);
             cam->unknown2 = U8(dat->cur, 3);
@@ -87,6 +88,11 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
             // possibly some culling thing, changing these values seems to do render glitches
             TerepCarPolygonData* polygon = calloc(1, sizeof(TerepCarPolygonData));
             LTASSERT(polygon);
+            printf("%X: ", dat->cur - dat->data);
+            for (int i = 6; i < 12; i++) {
+                printf("%02X ", U8(dat->cur, i));
+            }
+            printf("\n");
             car->renderData[car->renderDataCount].polygon = polygon;
             polygon->vertexCount = 3;
             polygon->vertices[0] = &car->points[U16(dat->cur, 0) >> 1];
@@ -165,7 +171,7 @@ static void _ParseChunk3(TerepCar* car, TerepDat* dat)
         }
         car->renderDataCount++;
     }
-    LTINFO("Loaded % i render data items\n", car->renderDataCount);
+    LTINFO("Loaded %i render data items\n", car->renderDataCount);
 }
 
 TerepCar* TerepCar_Load(const char* cardat, const char* carpcx)

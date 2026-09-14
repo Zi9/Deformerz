@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <raylib.h>
 #include <rlgl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -136,13 +137,34 @@ void DFCar_Render(DFCar* dfcar)
             DFCar_RenderPolygonColored(car->renderData[i].polygon, WHITE);
         }
     }
+    for (int i = 0; i < car->pointCount; i++) {
+        switch (car->points[i].type) {
+        case TEREP_POINT_GEOMETRY:
+            continue;
+        case TEREP_POINT_CAMERA:
+            DFCar_RenderPoint(&car->points[i], MAGENTA);
+            break;
+        case TEREP_POINT_WHEEL_FRONT:
+            DFCar_RenderPoint(&car->points[i], RED);
+            break;
+        case TEREP_POINT_WHEEL_REAR:
+            DFCar_RenderPoint(&car->points[i], BLUE);
+            break;
+        }
+    }
 }
 
-DFCar* DFCar_Load()
+DFCar* DFCar_Load(const char* carname)
 {
+    char dat[128];
+    char pcx[128];
+
+    snprintf(dat, 128, "./data/%s.dat", carname);
+    snprintf(pcx, 128, "./data/%s.pcx", carname);
+
     DFCar* dfcar = calloc(1, sizeof(DFCar));
     assert(dfcar);
-    dfcar->car = TerepCar_Load("./data/car1.dat", "./data/car1.pcx");
+    dfcar->car = TerepCar_Load(dat, pcx);
     dfcar->carTex = LoadTextureFromImage((Image){
         .data = dfcar->car->carTexture->data,
         .height = dfcar->car->carTexture->height,
@@ -150,7 +172,7 @@ DFCar* DFCar_Load()
         .format = 7,
         .mipmaps = 1,
     });
-    strncpy(dfcar->name, "./data/car1x.dat", sizeof(dfcar->name));
+    strncpy(dfcar->name, dat, sizeof(dfcar->name));
     return dfcar;
 }
 void DFCar_Unload(DFCar* dfcar)

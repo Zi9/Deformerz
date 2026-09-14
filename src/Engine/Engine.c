@@ -1,5 +1,6 @@
 #include "Engine.h"
-#include "Contexts/CarEditor/CarEditor.h"
+#include "Contexts/Startup/Startup.h"
+#include "LibTerep/PCX.h"
 #include "UI.h"
 #include <raylib.h>
 
@@ -40,7 +41,7 @@ int main()
     rlImGuiSetup(true);
 
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    _Current = CarEditorContext();
+    _Current = StartupContext();
 
     PCX_EnableGlobalPalette("./data/col.pcx"); // HACK: Fix this hardcoding at some point
     for (size_t i = 0; i < 256; i++) {

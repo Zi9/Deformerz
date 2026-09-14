@@ -19,17 +19,12 @@ static void _3D(DFCar* dfcar)
     }
     rlDrawRenderBatchActive();
     rlDisableDepthTest();
-    // if (_idx == -1)
-    //    return;
     Color c = RED;
     for (int i = 0; i < car->renderDataCount; i++) {
         if (car->renderData[i].type != TEREP_RENDERDATA_UNK3_POLYGON)
             continue;
+        if (_idx != i) continue;
         TerepCarPolygonData* poly = car->renderData[i].polygon;
-        if (i > 39)
-            c = GREEN;
-        if (i > 50)
-            c = BLUE;
         DrawLine3D(ToVector3(poly->vertices[0]->pos), ToVector3(poly->vertices[1]->pos), c);
         DrawLine3D(ToVector3(poly->vertices[1]->pos), ToVector3(poly->vertices[2]->pos), c);
     }

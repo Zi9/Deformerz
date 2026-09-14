@@ -3,6 +3,10 @@
 #include "Engine/UI.h"
 #include "LibTerep/TerepCar.h"
 #include "cimgui.h"
+#include "raylib.h"
+
+static BoundingBox _bbox = {0};
+static bool _showbbox = false;
 
 static void _UI_U16Editor(const char* label, uint16_t* value)
 {
@@ -32,16 +36,46 @@ static void _3D(DFCar* dfcar)
     }
     for (int i = 0; i < car->renderDataCount; i++) {
         if (car->renderData[i].type == TEREP_RENDERDATA_TEXTURE_POLYGON) {
-            DFCar_RenderPolygonTextured(car->renderData[i].polygon, dfcar->carTex, ColorAlpha(WHITE, 0.5f));
+            DFCar_RenderPolygonTextured(car->renderData[i].polygon, dfcar->carTex, WHITE);
         } else if (car->renderData[i].type == TEREP_RENDERDATA_COLOR_POLYGON && car->renderData[i].polygon->closed) {
-            DFCar_RenderPolygonColored(car->renderData[i].polygon, ColorAlpha(WHITE, 0.5f));
+            DFCar_RenderPolygonColored(car->renderData[i].polygon, WHITE);
         }
+    }
+    if (_showbbox) {
+        DrawBoundingBox(_bbox, GREEN);
     }
 }
 
 static void _UI(DFCar* dfcar)
 {
     TerepCar* car = dfcar->car;
+    igSeparatorText("Quick Load Car");
+    if (igButton("CAR1", (ImVec2){0})) {
+        CarEditor_LoadCar("car1");
+        return;
+    }
+    igSameLine(0, 8);
+    if (igButton("CAR2", (ImVec2){0})) {
+        CarEditor_LoadCar("car2");
+        return;
+    }
+    igSameLine(0, 8);
+    if (igButton("CAR3", (ImVec2){0})) {
+        CarEditor_LoadCar("car3");
+        return;
+    }
+    igSameLine(0, 8);
+    if (igButton("CAR4", (ImVec2){0})) {
+        CarEditor_LoadCar("car4");
+        return;
+    }
+    igSameLine(0, 8);
+    if (igButton("CAR5", (ImVec2){0})) {
+        CarEditor_LoadCar("car5");
+        return;
+    }
+
+    igSeparatorText("Currently Editing");
     igInputText("DAT file", dfcar->name, 128, 0, 0, 0);
     igSameLine(0, 8);
     if (igButton("Save", (ImVec2){0})) {
@@ -55,6 +89,28 @@ static void _UI(DFCar* dfcar)
     igText("Points: %i", car->pointCount);
     igText("Physics Links: %i", car->physLinkCount);
     igText("Render Data Items: %i", car->renderDataCount);
+
+    if (igButton("Show Bounding Box", (ImVec2){0})) {
+        _bbox.min = ToVector3(car->points[0].pos);
+        _bbox.max = ToVector3(car->points[0].pos);
+        for (int i = 1; i < car->pointCount; i++) {
+            Vector3 p = ToVector3(car->points[i].pos);
+            if (p.x < _bbox.min.x)
+                _bbox.min.x = p.x;
+            if (p.y < _bbox.min.y)
+                _bbox.min.y = p.y;
+            if (p.z < _bbox.min.z)
+                _bbox.min.z = p.z;
+
+            if (p.x > _bbox.max.x)
+                _bbox.max.x = p.x;
+            if (p.y > _bbox.max.y)
+                _bbox.max.y = p.y;
+            if (p.z > _bbox.max.z)
+                _bbox.max.z = p.z;
+        }
+        _showbbox = true;
+    }
 
     igSeparatorText("Switch Editor Mode");
     if (igButton("Points", (ImVec2){0})) {

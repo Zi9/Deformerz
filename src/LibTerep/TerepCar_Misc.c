@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 const char* TerepCar_Point2String(TerepCarPoint* point)
 {
@@ -92,4 +93,45 @@ void TerepCar_Unload(TerepCar* car)
         free(car);
     }
     printf("OK!\n");
+}
+
+static float _CalculateVector3Distance(float* v1, float* v2)
+{
+    float x = v2[0] - v1[0];
+    float y = v2[1] - v1[1];
+    float z = v2[2] - v1[2];
+    float res = sqrtf(x*x + y*y + z*z);
+    return res;
+}
+
+void TerepCar_RecalculatePhysLink(TerepCarPhysLink* link)
+{
+        link->len = _CalculateVector3Distance(link->pointA->pos, link->pointB->pos);
+        link->len2 = link->len;
+        if (link->type == TEREP_PHYSLINK_SUSP_FRONT10) {
+            link->len_min = link->len * 0.48;
+            link->len_max = link->len;
+        } else if (link->type == TEREP_PHYSLINK_SUSP_FRONT12) {
+            link->len_min = link->len * 0.48;
+            link->len_max = link->len;
+        } else if (link->type == TEREP_PHYSLINK_SUSP_REAR4) {
+            link->len_min = link->len * 0.45;
+            link->len_max = link->len;
+        } else if (link->type == TEREP_PHYSLINK_SUSP_REAR6) {
+            link->len_min = link->len * 0.45;
+            link->len_max = link->len;
+        } else if (link->type == TEREP_PHYSLINK_SUSP_EXTRA) {
+            link->len_min = link->len * 0.45;
+            link->len_max = link->len * 1.05;
+        } else {
+            link->len_min = link->len * 0.5;
+            link->len_max = link->len * 1.5;
+        }
+}
+void TerepCar_RecalculateAllPhysLinks(TerepCar* car)
+{
+    for (int j = 0; j < car->physLinkCount; j++) {
+        TerepCarPhysLink* p = &car->physLinks[j];
+        TerepCar_RecalculatePhysLink(p);
+    }
 }
